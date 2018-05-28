@@ -139,14 +139,13 @@ class Map(object):
           errs.append(np.linalg.norm(proj-uv))
 
         # cull
-        """
-        if (old_point and np.mean(errs) > 30) or np.mean(errs) > 100:
+        if old_point or np.mean(errs) > 100:
           p.delete()
           continue
-        """
 
         p.pt = np.array(est)
         new_points.append(p)
+      print("Culled:   %d points" % (len(self.points) - len(new_points)))
       self.points = new_points
 
     #print(dir(opt))
