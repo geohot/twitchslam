@@ -114,9 +114,12 @@ def process_frame(img):
     u1, v1 = denormalize(K, pt1)
     u2, v2 = denormalize(K, pt2)
     if f1.pts[i1] is not None:
-      cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
+      if len(f1.pts[i1].frames) >= 5:
+        cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
+      else:
+        cv2.circle(img, (u1, v1), color=(0,128,0), radius=3)
     else:
-      cv2.circle(img, (u1, v1), color=(0,0,255), radius=3)
+      cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
     cv2.line(img, (u1, v1), (u2, v2), color=(255,0,0))
 
   # 2-D display
