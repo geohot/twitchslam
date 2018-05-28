@@ -44,4 +44,5 @@ TODO
  * Check if points are in the field of view of the camera
 * Improve init to not need REVERSE environment variable
 * Add multiscale feature extractor
+* Add linux libraries and OS check
 
