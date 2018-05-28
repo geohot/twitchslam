@@ -74,7 +74,7 @@ def process_frame(img):
   mapp.display()
 
 if __name__ == "__main__":
-  cap = cv2.VideoCapture("test/test.mp4")
+  cap = cv2.VideoCapture("videos/test_drone.mp4")
 
   while cap.isOpened():
     ret, frame = cap.read()

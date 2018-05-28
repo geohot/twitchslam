@@ -31,7 +31,7 @@ def extractRt(E):
 def extract(img):
   orb = cv2.ORB_create()
   # detection
-  pts = cv2.goodFeaturesToTrack(np.mean(img, axis=2).astype(np.uint8), 3000, qualityLevel=0.01, minDistance=3)
+  pts = cv2.goodFeaturesToTrack(np.mean(img, axis=2).astype(np.uint8), 500, qualityLevel=0.01, minDistance=3)
 
   # extraction
   kps = [cv2.KeyPoint(x=f[0][0], y=f[0][1], _size=20) for f in pts]
@@ -58,13 +58,16 @@ def match_frames(f1, f2):
 
   for m,n in matches:
     if m.distance < 0.75*n.distance:
-      # keep around indices
-      idx1.append(m.queryIdx)
-      idx2.append(m.trainIdx)
-
       p1 = f1.pts[m.queryIdx]
       p2 = f2.pts[m.trainIdx]
-      ret.append((p1, p2))
+
+      if np.linalg.norm((p1-p2)) < 0.1:
+        # keep around indices
+        idx1.append(m.queryIdx)
+        idx2.append(m.trainIdx)
+
+        ret.append((p1, p2))
+
   assert len(ret) >= 8
   ret = np.array(ret)
   idx1 = np.array(idx1)
@@ -77,7 +80,7 @@ def match_frames(f1, f2):
                           min_samples=8,
                           #residual_threshold=1,
                           residual_threshold=0.005,
-                          max_trials=200)
+                          max_trials=100)
   #print(sum(inliers), len(inliers))
 
   # ignore outliers
