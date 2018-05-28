@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from scipy.spatial import KDTree
+from scipy.spatial import cKDTree
 np.set_printoptions(suppress=True)
 
 from skimage.measure import ransac
@@ -109,7 +109,7 @@ class Frame(object):
     self.h, self.w = img.shape[0:2]
 
     self.kpus, self.des = extract(img)
-    self.kd = KDTree(self.kpus)
+    self.kd = cKDTree(self.kpus)
     self.kps = normalize(self.Kinv, self.kpus)
     self.pts = [None]*len(self.kps)
 

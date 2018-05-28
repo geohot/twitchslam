@@ -94,13 +94,8 @@ def process_frame(img):
   pts4d /= pts4d[:, 3:]
 
   # locally in front of camera
-  pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
-  pts_tri_local /= pts_tri_local[:, 3:]
+  pts_tri_local = np.dot(f1.pose, pts4d.T).T
   good_pts4d &= pts_tri_local[:, 2] > 0
-
-  # TODO: reject points behind the camera better
-  #pts_tri_local = np.dot(f1.pose, pts_tri_local.T).T
-  #good_pts4d &= pts_tri_local[:, 2] > 0
 
   print("Adding:   %d new points, %d search by projection" % (np.sum(good_pts4d), sbp_pts_count))
 
@@ -128,7 +123,6 @@ def process_frame(img):
     disp.paint(img)
 
   # optimize the map
-  #if frame.id >= 4:
   if frame.id >= 4 and frame.id%3 == 0:
     err = mapp.optimize()
     print("Optimize: %f units of error" % err)
@@ -156,6 +150,7 @@ if __name__ == "__main__":
     F *= downscale
     H = int(H * downscale)
     W = 1024
+  print("using camera %dx%d with F %f" % (W,H,F))
 
   # camera intrinsics
   K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
