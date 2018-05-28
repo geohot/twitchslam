@@ -124,8 +124,8 @@ class Map(object):
           continue
         est = vert.estimate()
 
-        # 2 match point that's old
-        old_point = len(p.frames) == 2 and p.frames[-1] not in local_frames
+        # <= 3 match point that's old
+        old_point = len(p.frames) <= 3 and p.frames[-1] not in local_frames
 
         # compute reprojection error
         errs = []

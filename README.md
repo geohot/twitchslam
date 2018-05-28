@@ -55,8 +55,9 @@ TODO
 * Improve init to not need REVERSE environment variable
 * Add optimizer for F
 * Add multiscale feature extractor
-* Add linux libraries and OS check
-* Check accuracy with ground truth
-* Profile and speed up
+* Add Linux libraries and OS check
+* Profile and speed up more
 * Add loading and saving of map support
+* Add automated test for freiburg running on commit
+ * Check accuracy with ground truth
 
