@@ -45,6 +45,7 @@ def process_frame(img):
   frame = Frame(mapp, img, K)
   if frame.id == 0:
     return
+  print("\n*** frame %d ***" % (frame.id,))
 
   f1 = mapp.frames[-1]
   f2 = mapp.frames[-2]
@@ -52,9 +53,9 @@ def process_frame(img):
   idx1, idx2, Rt = match_frames(f1, f2)
   f1.pose = np.dot(Rt, f2.pose)
 
-  for i in range(len(f2.pts)):
-    if f2.pts[i] is not None:
-      f2.pts
+  for i,idx in enumerate(idx2):
+    if f2.pts[idx] is not None:
+      f2.pts[idx].add_observation(f1, idx1[i])
 
   # homogeneous 3-D coords
   pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
@@ -62,7 +63,8 @@ def process_frame(img):
 
   # reject pts without enough "parallax" (this right?)
   # reject points behind the camera
-  unmatched_points = np.array([f1.pts[i] is None for i in idx1]).astype(np.bool)
+  unmatched_points = np.array([f1.pts[i] is None for i in idx1])
+  print("Adding:  %d points" % np.sum(unmatched_points))
   good_pts4d = (np.abs(pts4d[:, 3]) > 0.005) & (pts4d[:, 2] > 0) & unmatched_points
   #print(sum(good_pts4d), len(good_pts4d))
 
@@ -82,6 +84,10 @@ def process_frame(img):
   # 2-D display
   if disp is not None:
     disp.paint(img)
+
+  # optimize the map
+  if frame.id >= 4:
+    mapp.optimize()
 
   # 3-D display
   mapp.display()
