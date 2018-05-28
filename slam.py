@@ -36,6 +36,7 @@ def triangulate(pose1, pose2, pts1, pts2):
   return ret
 
 def process_frame(img):
+  start_time = time.time()
   img = cv2.resize(img, (W,H))
   frame = Frame(mapp, img, K)
   if frame.id == 0:
@@ -123,13 +124,14 @@ def process_frame(img):
     disp.paint(img)
 
   # optimize the map
-  if frame.id >= 4 and frame.id%3 == 0:
+  if frame.id >= 4 and frame.id%5 == 0:
     err = mapp.optimize()
     print("Optimize: %f units of error" % err)
 
   # 3-D display
   mapp.display()
   print("Map:      %d points, %d frames" % (len(mapp.points), len(mapp.frames)))
+  print("Time:     %.2f ms" % ((time.time()-start_time)*1000.0))
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
