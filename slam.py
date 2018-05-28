@@ -66,19 +66,20 @@ def process_frame(img):
   #print(f1.pose)
 
   # search by projection
-  # OMG it's O(n^2)
   sbp_pts_count = 0
-  for p in mapp.points:
-    proj = np.dot(np.dot(K, f1.pose[:3]), p.homogeneous())
-    proj = proj[0:2] / proj[2]
+  if len(mapp.points) > 0:
+    map_points = np.array([p.homogeneous() for p in mapp.points])
+    projs = np.dot(np.dot(K, f1.pose[:3]), map_points.T).T
+    projs = projs[:, 0:2] / projs[:, 2:]
 
-    q = f1.kd.query_ball_point(proj, 5)
-    for m_idx in q:
-      if f1.pts[m_idx] is None:
-        o_dist = hamming_distance(p.orb(), f1.des[m_idx])
-        if o_dist < 32.0:
-          p.add_observation(f1, m_idx)
-          sbp_pts_count += 1
+    for i, p in enumerate(mapp.points):
+      q = f1.kd.query_ball_point(projs[i], 5)
+      for m_idx in q:
+        if f1.pts[m_idx] is None:
+          o_dist = hamming_distance(p.orb(), f1.des[m_idx])
+          if o_dist < 32.0:
+            p.add_observation(f1, m_idx)
+            sbp_pts_count += 1
 
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
