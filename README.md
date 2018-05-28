@@ -52,6 +52,7 @@ DONE
 TODO
 -----
 
+* BUGFIX: Improve lockups to happen less
 * Improve init to not need REVERSE environment variable
 * Add optimizer for F
 * Add multiscale feature extractor
