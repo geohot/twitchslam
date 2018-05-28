@@ -46,7 +46,7 @@ TODO
 * BUGFIX: Turning doesn't work well
 * Add optimizer for F
 * Stop using essential matrix for pose estimation once you have a track
- * Add kinematic model
+ * Add kinematic model (done)
  * Run g2o to only optimize the latest pose (done)
 * Add search by projection to refind old map points
  * Check if points are in the field of view of the camera

@@ -42,23 +42,33 @@ def process_frame(img):
   f2 = mapp.frames[-2]
 
   idx1, idx2, Rt = match_frames(f1, f2)
-  f1.pose = np.dot(Rt, f2.pose)
+
+  if frame.id < 5:
+    # get initial positions from fundamental matrix
+    f1.pose = np.dot(Rt, f2.pose)
+  else:
+    # kinematic model
+    velocity = np.dot(f2.pose, np.linalg.inv(mapp.frames[-3].pose))
+    f1.pose = np.dot(velocity, f2.pose)
 
   for i,idx in enumerate(idx2):
     if f2.pts[idx] is not None:
       f2.pts[idx].add_observation(f1, idx1[i])
 
   # pose optimization
+  #print(f1.pose)
   pose_opt = mapp.optimize(local_window=1, fix_points=True)
   print("Pose:     %f" % pose_opt)
+  #print(f1.pose)
 
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
   # locally in front of camera
-  # reject pts without enough "parallax" (this right?)
-  #pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
-  #good_pts4d &= np.abs(pts_tri_local[:, 3]) > 0.005
+  pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
+  pts_tri_local /= pts_tri_local[:, 3:]
+  good_pts4d &= pts_tri_local[:, 2] > 0
 
+  # reject pts without enough "parallax" (this right?)
   pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
   good_pts4d &= np.abs(pts4d[:, 3]) > 0.005
 
