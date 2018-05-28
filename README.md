@@ -17,18 +17,16 @@ Usage
 -----
 
 ```
-export D2D=1       # 2-D viewer
-export D3D=1       # 3-D viewer
 export REVERSE=1   # Hack for reverse video
 export F=500       # Focal length (in px)
 
 ./slam.py <video.mp4>
 
 # an example from the repo
-D2D=1 REVERSE=1 F=650 D3D=1 ./slam.py videos/test_countryroad_reverse.mp4 
+REVERSE=1 F=650 ./slam.py videos/test_countryroad_reverse.mp4 
 
 # kitti video test
-REVERSE=1 D2D=1 F=984 D3D=1 ./slam.py videos/test_kitti984_reverse.mp4
+REVERSE=1 F=984 ./slam.py videos/test_kitti984_reverse.mp4
 ```
 
 Libraries Used
@@ -39,17 +37,21 @@ Libraries Used
 * pangolin for 3-D display
 * g2opy for optimization (soon!)
 
-TODO
+DONE
 -----
 
 * BUGFIX: Why is window initting small? (fixed? ish, zoom is broken sometimes)
-* BUGFIX: Turning doesn't work well
-* Add optimizer for F
-* Stop using essential matrix for pose estimation once you have a track
+* BUGFIX: Turning doesn't work well (fixed?)
+* Stop using essential matrix for pose estimation once you have a track (done)
  * Add kinematic model (done)
  * Run g2o to only optimize the latest pose (done)
-* Add search by projection to refind old map points
+
+TODO
+-----
+
+* Add search by projection to refind old map points (done)
  * Check if points are in the field of view of the camera
+* Add optimizer for F
 * Improve init to not need REVERSE environment variable
 * Add multiscale feature extractor
 * Add linux libraries and OS check

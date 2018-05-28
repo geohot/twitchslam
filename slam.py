@@ -71,8 +71,11 @@ def process_frame(img):
     map_points = np.array([p.homogeneous() for p in mapp.points])
     projs = np.dot(np.dot(K, f1.pose[:3]), map_points.T).T
     projs = projs[:, 0:2] / projs[:, 2:]
-
+    good_pts = (projs[:, 0] > 0) & (projs[:, 0] < W) & \
+               (projs[:, 1] > 0) & (projs[:, 1] < H)
     for i, p in enumerate(mapp.points):
+      if not good_pts[i]:
+        continue
       q = f1.kd.query_ball_point(projs[i], 5)
       for m_idx in q:
         if f1.pts[m_idx] is None:
@@ -109,10 +112,15 @@ def process_frame(img):
     pt.add_observation(f1, idx1[i])
     pt.add_observation(f2, idx2[i])
 
-  for pt1, pt2 in zip(f1.kps[idx1], f2.kps[idx2]):
+  for i1, i2 in zip(idx1, idx2):
+    pt1 = f1.kps[i1]
+    pt2 = f2.kps[i2]
     u1, v1 = denormalize(K, pt1)
     u2, v2 = denormalize(K, pt2)
-    cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
+    if f1.pts[i1] is not None:
+      cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
+    else:
+      cv2.circle(img, (u1, v1), color=(0,0,255), radius=3)
     cv2.line(img, (u1, v1), (u2, v2), color=(255,0,0))
 
   # 2-D display
@@ -120,8 +128,8 @@ def process_frame(img):
     disp.paint(img)
 
   # optimize the map
-  #if frame.id >= 4 and frame.id%3 == 0:
-  if frame.id >= 4:
+  #if frame.id >= 4:
+  if frame.id >= 4 and frame.id%3 == 0:
     err = mapp.optimize()
     print("Optimize: %f units of error" % err)
 
@@ -134,20 +142,26 @@ if __name__ == "__main__":
     print("%s <video.mp4>" % sys.argv[0])
     exit(-1)
     
-  if os.getenv("D3D") is not None:
-    mapp.create_viewer()
-
+  # create displays and open file
+  mapp.create_viewer()
   cap = cv2.VideoCapture(sys.argv[1])
 
-  # camera intrinsics
+  # camera parameters
   W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
   H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-  F = int(os.getenv("F", "525"))
+  F = float(os.getenv("F", "525"))
+
+  if W > 1024:
+    downscale = 1024.0/W
+    F *= downscale
+    H = int(H * downscale)
+    W = 1024
+
+  # camera intrinsics
   K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
   Kinv = np.linalg.inv(K)
 
-  if os.getenv("D2D") is not None:
-    disp = Display(W, H)
+  disp = Display(W, H)
 
   while cap.isOpened():
     ret, frame = cap.read()
