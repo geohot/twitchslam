@@ -10,7 +10,11 @@ from skimage.transform import EssentialMatrixTransform
 def add_ones(x):
   return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)
 
-IRt = np.eye(4)
+def poseRt(R, t):
+  ret = np.eye(4)
+  ret[:3, :3] = R
+  ret[:3, 3] = t
+  return ret
 
 # pose
 def extractRt(F):
@@ -23,11 +27,7 @@ def extractRt(F):
   if np.sum(R.diagonal()) < 0:
     R = np.dot(np.dot(U, W.T), Vt)
   t = U[:, 2]
-  ret = np.eye(4)
-  ret[:3, :3] = R
-  ret[:3, 3] = t
-  #print(d)
-  return ret
+  return poseRt(R, t)
 
 def extract(img):
   orb = cv2.ORB_create()
@@ -100,7 +100,7 @@ class Frame(object):
   def __init__(self, mapp, img, K):
     self.K = K
     self.Kinv = np.linalg.inv(self.K)
-    self.pose = IRt
+    self.pose = np.eye(4)
     self.h, self.w = img.shape[0:2]
 
     kps, self.des = extract(img)

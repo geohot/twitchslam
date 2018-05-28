@@ -4,7 +4,7 @@ import sys
 import time
 import cv2
 from display import Display
-from frame import Frame, denormalize, match_frames, IRt
+from frame import Frame, denormalize, match_frames
 import numpy as np
 import g2o
 from pointmap import Map, Point
