@@ -21,7 +21,6 @@ Kinv = np.linalg.inv(K)
 mapp = Map()
 disp = None
 
-
 def triangulate(pose1, pose2, pts1, pts2):
   ret = np.zeros((pts1.shape[0], 4))
   pose1 = np.linalg.inv(pose1)
@@ -34,6 +33,9 @@ def triangulate(pose1, pose2, pts1, pts2):
     A[3] = p[1][1] * pose2[2] - pose2[1]
     _, _, vt = np.linalg.svd(A)
     ret[i] = vt[3]
+  #print(pose1)
+  #print(pose2)
+  #print(ret[0:10]/ret[0:10, 3:])
   return ret
 
 def process_frame(img):
@@ -53,16 +55,22 @@ def process_frame(img):
     if f2.pts[idx] is not None:
       f2.pts[idx].add_observation(f1, idx1[i])
 
-  # homogeneous 3-D coords
-  pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
-  pts4d /= pts4d[:, 3:]
+  good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
+  # locally in front of camera
   # reject pts without enough "parallax" (this right?)
+  pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
+  good_pts4d &= np.abs(pts_tri_local[:, 3]) > 0.005
+
+  # homogeneous 3-D coords
   # reject points behind the camera
-  unmatched_points = np.array([f1.pts[i] is None for i in idx1])
-  print("Adding:   %d points" % np.sum(unmatched_points))
-  good_pts4d = (np.abs(pts4d[:, 3]) > 0.005) & (pts4d[:, 2] > 0) & unmatched_points
-  #print(sum(good_pts4d), len(good_pts4d))
+  pts_tri_local /= pts_tri_local[:, 3:]
+  good_pts4d &= pts_tri_local[:, 2] > 0
+
+  # project into world
+  pts4d = np.dot(np.linalg.inv(f1.pose), pts_tri_local.T).T
+
+  print("Adding:   %d points" % np.sum(good_pts4d))
 
   for i,p in enumerate(pts4d):
     if not good_pts4d[i]:

@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 np.set_printoptions(suppress=True)
@@ -28,6 +29,8 @@ def extractRt(F):
   if np.sum(R.diagonal()) < 0:
     R = np.dot(np.dot(U, W.T), Vt)
   t = U[:, 2]
+  if os.getenv("REVERSE") is not None:
+    t *= -1
   return poseRt(R, t)
 
 def extract(img):

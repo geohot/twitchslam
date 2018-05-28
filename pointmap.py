@@ -6,6 +6,7 @@ import pangolin
 import g2o
 
 LOCAL_WINDOW = 20
+#LOCAL_WINDOW = None
 
 class Point(object):
   # A Point is a 3-D point in the world
@@ -50,7 +51,10 @@ class Map(object):
 
     robust_kernel = g2o.RobustKernelHuber(np.sqrt(5.991))
 
-    local_frames = self.frames[-LOCAL_WINDOW:]
+    if LOCAL_WINDOW is None:
+      local_frames = self.frames
+    else:
+      local_frames = self.frames[-LOCAL_WINDOW:]
 
     # add frames to graph
     for f in self.frames:
@@ -119,9 +123,9 @@ class Map(object):
         errs.append(np.linalg.norm(proj-uv))
 
       # cull
-      if (old_point and np.mean(errs) > 30) or np.mean(errs) > 100:
-        p.delete()
-        continue
+      #if (old_point and np.mean(errs) > 30) or np.mean(errs) > 100:
+      #  p.delete()
+      #  continue
 
       p.pt = np.array(est)
       new_points.append(p)
