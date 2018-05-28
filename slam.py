@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import os
 import sys
+
+sys.path.append("lib/macosx")
+
 import time
 import cv2
 from display import Display

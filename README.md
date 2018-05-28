@@ -13,7 +13,15 @@ Usage
 -----
 
 ```
-D2D=1 D3D=1 ./slam.py <video.mp4>
+export D2D=1       # 2-D viewer
+export D3D=1       # 3-D viewer
+export REVERSE=1   # Hack for reverse video
+export F=500       # Focal length (in px)
+
+./slam.py <video.mp4>
+
+# an example from the repo
+D2D=1 REVERSE=1 F=650 D3D=1 ./slam.py videos/test_countryroad_reverse.mp4 
 ```
 
 Libraries Used
