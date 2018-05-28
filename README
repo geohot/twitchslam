@@ -13,6 +13,7 @@ Uses:
 * g2opy for optimization (soon!)
 
 TODO:
+* BUGFIX: Why is window initting small?
 * Add optimizer for F
 * Stop using essential matrix for pose estimation once you have a track
 ** Add kinematic model

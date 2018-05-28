@@ -1,5 +1,6 @@
 from multiprocessing import Process, Queue
 from frame import poseRt
+import time
 import numpy as np
 import OpenGL.GL as gl
 import pangolin
@@ -141,6 +142,7 @@ class Map(object):
     self.vp = Process(target=self.viewer_thread, args=(self.q,))
     self.vp.daemon = True
     self.vp.start()
+    time.sleep(0.1)
 
   def viewer_thread(self, q):
     self.viewer_init(1024, 768)
