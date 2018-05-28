@@ -130,6 +130,7 @@ def process_frame(img):
 
   # 3-D display
   mapp.display()
+  print("Map:      %d points, %d frames" % (len(mapp.points), len(mapp.frames)))
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
