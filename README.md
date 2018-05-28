@@ -51,10 +51,12 @@ DONE
 TODO
 -----
 
-* Add optimizer for F
+* BUGFIX: Fix moving up! (y axis flipped?)
 * Improve init to not need REVERSE environment variable
+* Add optimizer for F
 * Add multiscale feature extractor
 * Add linux libraries and OS check
 * Check accuracy with ground truth
 * Profile and speed up
+* Add loading and saving of map support
 

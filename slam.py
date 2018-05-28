@@ -149,6 +149,8 @@ if __name__ == "__main__":
   W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
   H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
   F = float(os.getenv("F", "525"))
+  if os.getenv("STARTFRAME") is not None:
+    cap.set(cv2.CAP_PROP_POS_FRAMES, int(os.getenv("STARTFRAME")))
 
   if W > 1024:
     downscale = 1024.0/W
