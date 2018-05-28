@@ -71,7 +71,8 @@ def process_frame(img):
   for i,p in enumerate(pts4d):
     if not good_pts4d[i]:
       continue
-    pt = Point(mapp, p)
+    u,v = int(round(f1.kpus[idx1[i],0])), int(round(f1.kpus[idx1[i],1]))
+    pt = Point(mapp, p, img[v,u])
     pt.add_observation(f1, idx1[i])
     pt.add_observation(f2, idx2[i])
 
