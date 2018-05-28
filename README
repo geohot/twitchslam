@@ -2,7 +2,11 @@ A toy implementation of SLAM written while livestreaming.
 
 https://www.twitch.tv/tomcr00s3
 
-Uses
+Usage:
+
+D2D=1 D3D=1 ./slam.py <video.mp4>
+
+Uses:
 * SDL2 for 2-D display
 * cv2 for feature extraction
 * pangolin for 3-D display

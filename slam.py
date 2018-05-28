@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import time
 import cv2
 from display import Display
@@ -8,15 +9,22 @@ import numpy as np
 import g2o
 from pointmap import Map, Point
 
+# set this!
+F = 800
+
 # camera intrinsics
 W, H = 1920//2, 1080//2
-F = 800
 K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
 Kinv = np.linalg.inv(K)
 
 # main classes
 mapp = Map()
-disp = Display(W, H) if os.getenv("D2D") is not None else None
+if os.getenv("D3D") is not None:
+  mapp.create_viewer()
+
+disp = None
+if os.getenv("D2D") is not None:
+  disp = Display(W, H)
 
 def triangulate(pose1, pose2, pts1, pts2):
   ret = np.zeros((pts1.shape[0], 4))
@@ -74,7 +82,11 @@ def process_frame(img):
   mapp.display()
 
 if __name__ == "__main__":
-  cap = cv2.VideoCapture("videos/test_ohio.mp4")
+  if len(sys.argv) < 2:
+    print("%s <video.mp4>" % sys.argv[0])
+    exit(-1)
+    
+  cap = cv2.VideoCapture(sys.argv[1])
 
   while cap.isOpened():
     ret, frame = cap.read()
