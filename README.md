@@ -45,14 +45,16 @@ DONE
 * Stop using essential matrix for pose estimation once you have a track (done)
  * Add kinematic model (done)
  * Run g2o to only optimize the latest pose (done)
+* Add search by projection to refind old map points (done)
+ * Check if points are in the field of view of the camera (done)
 
 TODO
 -----
 
-* Add search by projection to refind old map points (done)
- * Check if points are in the field of view of the camera
 * Add optimizer for F
 * Improve init to not need REVERSE environment variable
 * Add multiscale feature extractor
 * Add linux libraries and OS check
+* Check accuracy with ground truth
+* Profile and speed up
 

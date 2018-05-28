@@ -193,15 +193,21 @@ class Map(object):
     self.dcam.Activate(self.scam)
 
     if self.state is not None:
-      # draw poses
-      gl.glColor3f(0.0, 1.0, 0.0)
-      pangolin.DrawCameras(self.state[0])
+      if self.state[0].shape[0] >= 2:
+        # draw poses
+        gl.glColor3f(0.0, 1.0, 0.0)
+        pangolin.DrawCameras(self.state[0][:-1])
 
-      # draw keypoints
-      gl.glPointSize(5)
-      gl.glColor3f(1.0, 0.0, 0.0)
-      #print(self.state[2])
-      pangolin.DrawPoints(self.state[1], self.state[2])
+      if self.state[0].shape[0] >= 1:
+        # draw current pose as yellow
+        gl.glColor3f(1.0, 1.0, 0.0)
+        pangolin.DrawCameras(self.state[0][-1:])
+
+      if self.state[1].shape[0] != 0:
+        # draw keypoints
+        gl.glPointSize(5)
+        gl.glColor3f(1.0, 0.0, 0.0)
+        pangolin.DrawPoints(self.state[1], self.state[2])
 
     pangolin.FinishFrame()
 
