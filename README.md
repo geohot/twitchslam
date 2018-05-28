@@ -22,11 +22,8 @@ export F=500       # Focal length (in px)
 
 ./slam.py <video.mp4>
 
-# an example from the repo
-REVERSE=1 F=650 ./slam.py videos/test_countryroad_reverse.mp4 
-
-# kitti video test
-REVERSE=1 F=984 ./slam.py videos/test_kitti984_reverse.mp4
+# good example
+F=525 ./slam.py videos/test_freiburgxyz525.mp4
 ```
 
 Libraries Used
