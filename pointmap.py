@@ -27,13 +27,11 @@ class Point(object):
     return np.array([self.pt[0], self.pt[1], self.pt[2], 1.0])
 
   def orb(self):
-    # TODO: average orbs in hamming space
-    #des = []
-    #for f in self.frames:
-    #  des.append(f.des[f.pts.index(self)])
-    #print("***", des)
-    f = self.frames[-1]
-    return f.des[f.pts.index(self)]
+    # TODO: average orbs in hamming space?
+    des = []
+    for f in self.frames:
+      des.append(f.des[f.pts.index(self)])
+    return des
   
   def delete(self):
     for f in self.frames:

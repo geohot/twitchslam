@@ -47,11 +47,11 @@ DONE
  * Run g2o to only optimize the latest pose (done)
 * Add search by projection to refind old map points (done)
  * Check if points are in the field of view of the camera (done)
+* BUGFIX: Fix moving up! (y axis flipped? nah, it's okay)
 
 TODO
 -----
 
-* BUGFIX: Fix moving up! (y axis flipped?)
 * Improve init to not need REVERSE environment variable
 * Add optimizer for F
 * Add multiscale feature extractor

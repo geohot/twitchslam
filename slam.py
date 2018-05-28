@@ -79,10 +79,13 @@ def process_frame(img):
       q = f1.kd.query_ball_point(projs[i], 5)
       for m_idx in q:
         if f1.pts[m_idx] is None:
-          o_dist = hamming_distance(p.orb(), f1.des[m_idx])
-          if o_dist < 32.0:
-            p.add_observation(f1, m_idx)
-            sbp_pts_count += 1
+          # if any descriptors within 32
+          for o in p.orb():
+            o_dist = hamming_distance(o, f1.des[m_idx])
+            if o_dist < 32.0:
+              p.add_observation(f1, m_idx)
+              sbp_pts_count += 1
+              break
 
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
