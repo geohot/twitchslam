@@ -2,7 +2,7 @@
 
 A toy implementation of SLAM written while livestreaming.
 
-<img src="https://raw.githubusercontent.com/geohot/twitchslam/master/demo.png" />
+<img width=300px src="https://raw.githubusercontent.com/geohot/twitchslam/master/demo.png" />
 
 Stream
 -----
