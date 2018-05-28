@@ -42,7 +42,7 @@ Libraries Used
 TODO
 -----
 
-* BUGFIX: Why is window initting small?
+* BUGFIX: Why is window initting small? (fixed?)
 * BUGFIX: Turning doesn't work well
 * Add optimizer for F
 * Stop using essential matrix for pose estimation once you have a track

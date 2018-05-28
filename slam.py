@@ -12,23 +12,12 @@ import numpy as np
 import g2o
 from pointmap import Map, Point
 
-# set this!
-F = int(os.getenv("F", "800"))
-
-# camera intrinsics
-#W, H = 1920//2, 1080//2
-W, H = 1242,375
-K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
-Kinv = np.linalg.inv(K)
-
 # main classes
 mapp = Map()
 disp = None
 
 def triangulate(pose1, pose2, pts1, pts2):
   ret = np.zeros((pts1.shape[0], 4))
-  pose1 = np.linalg.inv(pose1)
-  pose2 = np.linalg.inv(pose2)
   for i, p in enumerate(zip(pts1, pts2)):
     A = np.zeros((4,4))
     A[0] = p[0][0] * pose1[2] - pose1[0]
@@ -63,16 +52,18 @@ def process_frame(img):
 
   # locally in front of camera
   # reject pts without enough "parallax" (this right?)
-  pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
-  good_pts4d &= np.abs(pts_tri_local[:, 3]) > 0.005
+  #pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
+  #good_pts4d &= np.abs(pts_tri_local[:, 3]) > 0.005
+
+  pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
+  good_pts4d &= np.abs(pts4d[:, 3]) > 0.005
 
   # homogeneous 3-D coords
-  # reject points behind the camera
-  pts_tri_local /= pts_tri_local[:, 3:]
-  good_pts4d &= pts_tri_local[:, 2] > 0
+  pts4d /= pts4d[:, 3:]
 
-  # project into world
-  pts4d = np.dot(np.linalg.inv(f1.pose), pts_tri_local.T).T
+  # TODO: reject points behind the camera
+  #pts4d = np.dot(f1.pose, pts_tri_local.T).T
+  #good_pts4d &= pts_tri_local[:, 2] > 0
 
   print("Adding:   %d points" % np.sum(good_pts4d))
 
@@ -109,10 +100,18 @@ if __name__ == "__main__":
     
   if os.getenv("D3D") is not None:
     mapp.create_viewer()
-  if os.getenv("D2D") is not None:
-    disp = Display(W, H)
 
   cap = cv2.VideoCapture(sys.argv[1])
+
+  # camera intrinsics
+  W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+  H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+  F = int(os.getenv("F", "525"))
+  K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
+  Kinv = np.linalg.inv(K)
+
+  if os.getenv("D2D") is not None:
+    disp = Display(W, H)
 
   while cap.isOpened():
     ret, frame = cap.read()

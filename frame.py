@@ -31,7 +31,7 @@ def extractRt(F):
   t = U[:, 2]
   if os.getenv("REVERSE") is not None:
     t *= -1
-  return poseRt(R, t)
+  return np.linalg.inv(poseRt(R, t))
 
 def extract(img):
   orb = cv2.ORB_create()
