@@ -61,3 +61,8 @@ TODO
 * Add automated test for freiburg running on commit
  * Check accuracy with ground truth
 
+LICENSE
+-----
+
+All my code is MIT licensed. Videos and libraries follow their respective licenses.
+
