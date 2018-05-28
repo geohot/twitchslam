@@ -150,7 +150,7 @@ class Map(object):
       self.viewer_refresh(q)
 
   def viewer_init(self, w, h):
-    pangolin.CreateWindowAndBind('Main', w, h)
+    pangolin.CreateWindowAndBind('Map Viewer', w, h)
     gl.glEnable(gl.GL_DEPTH_TEST)
 
     self.scam = pangolin.OpenGlRenderState(
@@ -164,6 +164,9 @@ class Map(object):
     self.dcam = pangolin.CreateDisplay()
     self.dcam.SetBounds(0.0, 1.0, 0.0, 1.0, -w/h)
     self.dcam.SetHandler(self.handler)
+
+    # hack to avoid small Pangolin, no idea why it's *2
+    self.dcam.Resize(pangolin.Viewport(0,0,w*2,h*2))
 
   def viewer_refresh(self, q):
     if not q.empty():
