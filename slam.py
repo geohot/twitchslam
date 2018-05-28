@@ -64,7 +64,7 @@ def process_frame(img):
   # reject pts without enough "parallax" (this right?)
   # reject points behind the camera
   unmatched_points = np.array([f1.pts[i] is None for i in idx1])
-  print("Adding:  %d points" % np.sum(unmatched_points))
+  print("Adding:   %d points" % np.sum(unmatched_points))
   good_pts4d = (np.abs(pts4d[:, 3]) > 0.005) & (pts4d[:, 2] > 0) & unmatched_points
   #print(sum(good_pts4d), len(good_pts4d))
 
@@ -88,7 +88,8 @@ def process_frame(img):
 
   # optimize the map
   if frame.id >= 4:
-    mapp.optimize()
+    err = mapp.optimize()
+    print("Optimize: %f units of error" % err)
 
   # 3-D display
   mapp.display()

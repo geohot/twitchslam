@@ -15,8 +15,14 @@ class Point(object):
     self.idxs = []
     self.color = np.copy(color)
     
-    self.id = len(mapp.points)
+    self.id = mapp.max_point
+    mapp.max_point += 1
     mapp.points.append(self)
+  
+  def delete(self):
+    for f in self.frames:
+      f.pts[f.pts.index(self)] = None
+    del self
 
   def add_observation(self, frame, idx):
     frame.pts[idx] = self
@@ -27,6 +33,7 @@ class Map(object):
   def __init__(self):
     self.frames = []
     self.points = []
+    self.max_point = 0
     self.state = None
     self.q = None
 
@@ -74,7 +81,7 @@ class Map(object):
         edge.set_robust_kernel(robust_kernel)
         opt.add_edge(edge)
         
-    opt.set_verbose(True)
+    #opt.set_verbose(True)
     opt.initialize_optimization()
     opt.optimize(50)
 
@@ -85,10 +92,33 @@ class Map(object):
       t = est.translation()
       f.pose = poseRt(R, t)
 
-    # put points back
+    # put points back (and cull)
+    new_points = []
     for p in self.points:
       est = opt.vertex(p.id + PT_ID_OFFSET).estimate()
+
+      # 2 match point that's old
+      #if len(p.frames) == 2 and p.frames[-1].id < (len(self.frames)-5):
+      #  p.delete()
+      #  continue
+
+      # compute reprojection error
+      errs = []
+      for f in p.frames:
+        uv = f.kpus[f.pts.index(p)]
+        proj = np.dot(f.K, est)
+        proj = proj[0:2] / proj[2]
+        errs.append(np.linalg.norm(proj-uv))
+      if np.mean(errs) > 100:
+        p.delete()
+        continue
+
       p.pt = np.array(est)
+      new_points.append(p)
+
+    self.points = new_points
+
+    return opt.chi2()
 
   # *** viewer ***
 
