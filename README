@@ -12,3 +12,10 @@ Uses:
 * pangolin for 3-D display
 * g2opy for optimization (soon!)
 
+TODO:
+* Add optimizer for F
+* Stop using essential matrix for pose estimation once you have a track
+** Add kinematic model
+** Run g2o to only optimize the latest pose
+* Add search by projection to refind old map points
+

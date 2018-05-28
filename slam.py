@@ -19,12 +19,8 @@ Kinv = np.linalg.inv(K)
 
 # main classes
 mapp = Map()
-if os.getenv("D3D") is not None:
-  mapp.create_viewer()
-
 disp = None
-if os.getenv("D2D") is not None:
-  disp = Display(W, H)
+
 
 def triangulate(pose1, pose2, pts1, pts2):
   ret = np.zeros((pts1.shape[0], 4))
@@ -99,6 +95,11 @@ if __name__ == "__main__":
     print("%s <video.mp4>" % sys.argv[0])
     exit(-1)
     
+  if os.getenv("D3D") is not None:
+    mapp.create_viewer()
+  if os.getenv("D2D") is not None:
+    disp = Display(W, H)
+
   cap = cv2.VideoCapture(sys.argv[1])
 
   while cap.isOpened():
