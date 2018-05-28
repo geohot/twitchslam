@@ -41,7 +41,7 @@ class Map(object):
     gl.glEnable(gl.GL_DEPTH_TEST)
 
     self.scam = pangolin.OpenGlRenderState(
-      pangolin.ProjectionMatrix(w, h, 420, 420, w//2, h//2, 0.2, 1000),
+      pangolin.ProjectionMatrix(w, h, 420, 420, w//2, h//2, 0.2, 10000),
       pangolin.ModelViewLookAt(0, -10, -8,
                                0, 0, 0,
                                0, -1, 0))

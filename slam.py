@@ -10,7 +10,7 @@ from pointmap import Map, Point
 
 # camera intrinsics
 W, H = 1920//2, 1080//2
-F = 270
+F = 800
 K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
 Kinv = np.linalg.inv(K)
 
