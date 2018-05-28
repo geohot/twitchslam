@@ -1,1 +1,9 @@
-Works to display video.
+A toy implementation of SLAM written while livestreaming.
+
+https://www.twitch.tv/tomcr00s3
+
+Uses
+* SDL2 for display
+* cv2 for feature extraction
+* g2opy for optimization (soon!)
+
