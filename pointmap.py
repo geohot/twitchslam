@@ -23,6 +23,9 @@ class Point(object):
     mapp.max_point += 1
     mapp.points.append(self)
 
+  def homogeneous(self):
+    return np.array([self.pt[0], self.pt[1], self.pt[2], 1.0])
+
   def orb(self):
     # TODO: average orbs in hamming space
     #des = []

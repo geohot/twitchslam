@@ -16,6 +16,10 @@ from pointmap import Map, Point
 mapp = Map()
 disp = None
 
+def hamming_distance(a, b):
+  r = (1 << np.arange(8))[:,None]
+  return np.count_nonzero((np.bitwise_xor(a,b) & r) != 0)
+
 def triangulate(pose1, pose2, pts1, pts2):
   ret = np.zeros((pts1.shape[0], 4))
   for i, p in enumerate(zip(pts1, pts2)):
@@ -61,12 +65,26 @@ def process_frame(img):
   print("Pose:     %f" % pose_opt)
   #print(f1.pose)
 
-  good_pts4d = np.array([f1.pts[i] is None for i in idx1])
+  # search by projection
+  # OMG it's O(n^2)
+  sbp_pts_count = 0
+  for p in mapp.points:
+    proj = np.dot(np.dot(K, f1.pose[:3]), p.homogeneous())
+    proj = proj[0:2] / proj[2]
+    m_dist = None
+    m_idx = None
+    for i in range(len(f1.kps)):
+      o_dist = hamming_distance(p.orb(), f1.des[i])
+      e_dist = np.linalg.norm(f1.kpus[i] - proj)
+      t_dist = o_dist + e_dist * 10.0
+      if m_dist is None or t_dist < m_dist:
+        m_dist = t_dist
+        m_idx = i
+    if m_dist < 20.0 and f1.pts[m_idx] is None:
+      p.add_observation(f1, m_idx)
+      sbp_pts_count += 1
 
-  # locally in front of camera
-  pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
-  pts_tri_local /= pts_tri_local[:, 3:]
-  good_pts4d &= pts_tri_local[:, 2] > 0
+  good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
   # reject pts without enough "parallax" (this right?)
   pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
@@ -75,17 +93,22 @@ def process_frame(img):
   # homogeneous 3-D coords
   pts4d /= pts4d[:, 3:]
 
-  # TODO: reject points behind the camera
-  #pts4d = np.dot(f1.pose, pts_tri_local.T).T
+  # locally in front of camera
+  pts_tri_local = triangulate(Rt, np.eye(4), f1.kps[idx1], f2.kps[idx2])
+  pts_tri_local /= pts_tri_local[:, 3:]
+  good_pts4d &= pts_tri_local[:, 2] > 0
+
+  # TODO: reject points behind the camera better
+  #pts_tri_local = np.dot(f1.pose, pts_tri_local.T).T
   #good_pts4d &= pts_tri_local[:, 2] > 0
 
-  print("Adding:   %d points" % np.sum(good_pts4d))
+  print("Adding:   %d new points, %d search by projection" % (np.sum(good_pts4d), sbp_pts_count))
 
   for i,p in enumerate(pts4d):
     if not good_pts4d[i]:
       continue
     u,v = int(round(f1.kpus[idx1[i],0])), int(round(f1.kpus[idx1[i],1]))
-    pt = Point(mapp, p, img[v,u])
+    pt = Point(mapp, p[0:3], img[v,u])
     pt.add_observation(f1, idx1[i])
     pt.add_observation(f2, idx2[i])
 
@@ -100,6 +123,7 @@ def process_frame(img):
     disp.paint(img)
 
   # optimize the map
+  #if frame.id >= 4 and frame.id%3 == 0:
   if frame.id >= 4:
     err = mapp.optimize()
     print("Optimize: %f units of error" % err)
