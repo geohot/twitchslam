@@ -41,7 +41,6 @@ def process_frame(img):
   frame = Frame(mapp, img, K)
   if frame.id == 0:
     return
-  print("\n*** frame %d ***" % (frame.id,))
 
   f1 = mapp.frames[-1]
   f2 = mapp.frames[-2]
@@ -148,9 +147,10 @@ if __name__ == "__main__":
   # camera parameters
   W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
   H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+  CNT = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
   F = float(os.getenv("F", "525"))
-  if os.getenv("STARTFRAME") is not None:
-    cap.set(cv2.CAP_PROP_POS_FRAMES, int(os.getenv("STARTFRAME")))
+  if os.getenv("SEEK") is not None:
+    cap.set(cv2.CAP_PROP_POS_FRAMES, int(os.getenv("SEEK")))
 
   if W > 1024:
     downscale = 1024.0/W
@@ -165,10 +165,13 @@ if __name__ == "__main__":
 
   disp = Display(W, H)
 
+  i = 0
   while cap.isOpened():
     ret, frame = cap.read()
+    print("\n*** frame %d/%d ***" % (i, CNT))
     if ret == True:
       process_frame(frame)
     else:
       break
+    i += 1
 

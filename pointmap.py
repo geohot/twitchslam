@@ -185,7 +185,7 @@ class Map(object):
 
 
   def viewer_refresh(self, q):
-    if not q.empty():
+    while not q.empty():
       self.state = q.get()
 
     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
