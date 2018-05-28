@@ -78,7 +78,7 @@ def match_frames(f1, f2):
                           #residual_threshold=1,
                           residual_threshold=0.005,
                           max_trials=200)
-  print(sum(inliers), len(inliers))
+  #print(sum(inliers), len(inliers))
 
   # ignore outliers
   Rt = extractRt(model.params)
