@@ -71,18 +71,14 @@ def process_frame(img):
   for p in mapp.points:
     proj = np.dot(np.dot(K, f1.pose[:3]), p.homogeneous())
     proj = proj[0:2] / proj[2]
-    m_dist = None
-    m_idx = None
-    for i in range(len(f1.kps)):
-      o_dist = hamming_distance(p.orb(), f1.des[i])
-      e_dist = np.linalg.norm(f1.kpus[i] - proj)
-      t_dist = o_dist + e_dist * 10.0
-      if m_dist is None or t_dist < m_dist:
-        m_dist = t_dist
-        m_idx = i
-    if m_dist < 20.0 and f1.pts[m_idx] is None:
-      p.add_observation(f1, m_idx)
-      sbp_pts_count += 1
+
+    q = f1.kd.query_ball_point(proj, 5)
+    for m_idx in q:
+      if f1.pts[m_idx] is None:
+        o_dist = hamming_distance(p.orb(), f1.des[m_idx])
+        if o_dist < 32.0:
+          p.add_observation(f1, m_idx)
+          sbp_pts_count += 1
 
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
