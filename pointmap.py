@@ -45,13 +45,12 @@ class Map(object):
       pose = f.pose
       #pose = np.linalg.inv(pose)
       sbacam = g2o.SBACam(g2o.SE3Quat(pose[0:3, 0:3], pose[0:3, 3]))
-      #sbacam.set_cam(f.K[0][0], f.K[1][1], f.K[2][0], f.K[2][1], 1.0)
-      sbacam.set_cam(1.0, 1.0, 0.0, 0.0, 1.0)
+      sbacam.set_cam(f.K[0][0], f.K[1][1], f.K[0][2], f.K[1][2], 1.0)
 
       v_se3 = g2o.VertexCam()
       v_se3.set_id(f.id)
       v_se3.set_estimate(sbacam)
-      v_se3.set_fixed(f.id == 0)
+      v_se3.set_fixed(f.id <= 1)
       opt.add_vertex(v_se3)
 
     # add points to frames
@@ -68,7 +67,7 @@ class Map(object):
         edge = g2o.EdgeProjectP2MC()
         edge.set_vertex(0, pt)
         edge.set_vertex(1, opt.vertex(f.id))
-        uv = f.kps[f.pts.index(p)]
+        uv = f.kpus[f.pts.index(p)]
         edge.set_measurement(uv)
         edge.set_information(np.eye(2))
         edge.set_robust_kernel(robust_kernel)
@@ -76,7 +75,7 @@ class Map(object):
         
     opt.set_verbose(True)
     opt.initialize_optimization()
-    opt.optimize(10)
+    opt.optimize(50)
 
     # put frames back
     for f in self.frames:
