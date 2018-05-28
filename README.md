@@ -22,6 +22,9 @@ export F=500       # Focal length (in px)
 
 # an example from the repo
 D2D=1 REVERSE=1 F=650 D3D=1 ./slam.py videos/test_countryroad_reverse.mp4 
+
+# kitti video test
+REVERSE=1 D2D=1 F=984 D3D=1 ./slam.py videos/test_kitti984_reverse.mp4
 ```
 
 Libraries Used
@@ -36,6 +39,7 @@ TODO
 -----
 
 * BUGFIX: Why is window initting small?
+* BUGFIX: Turning doesn't work well
 * Add optimizer for F
 * Stop using essential matrix for pose estimation once you have a track
  * Add kinematic model
