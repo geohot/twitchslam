@@ -42,12 +42,12 @@ Libraries Used
 TODO
 -----
 
-* BUGFIX: Why is window initting small? (fixed?)
+* BUGFIX: Why is window initting small? (fixed? ish, zoom is broken sometimes)
 * BUGFIX: Turning doesn't work well
 * Add optimizer for F
 * Stop using essential matrix for pose estimation once you have a track
  * Add kinematic model
- * Run g2o to only optimize the latest pose
+ * Run g2o to only optimize the latest pose (done)
 * Add search by projection to refind old map points
  * Check if points are in the field of view of the camera
 * Improve init to not need REVERSE environment variable

@@ -22,6 +22,15 @@ class Point(object):
     self.id = mapp.max_point
     mapp.max_point += 1
     mapp.points.append(self)
+
+  def orb(self):
+    # TODO: average orbs in hamming space
+    #des = []
+    #for f in self.frames:
+    #  des.append(f.des[f.pts.index(self)])
+    #print("***", des)
+    f = self.frames[-1]
+    return f.des[f.pts.index(self)]
   
   def delete(self):
     for f in self.frames:
@@ -43,7 +52,7 @@ class Map(object):
 
   # *** optimizer ***
 
-  def optimize(self):
+  def optimize(self, local_window=LOCAL_WINDOW, fix_points=False, verbose=False):
     # create g2o optimizer
     opt = g2o.SparseOptimizer()
     solver = g2o.BlockSolverSE3(g2o.LinearSolverCholmodSE3())
@@ -52,10 +61,10 @@ class Map(object):
 
     robust_kernel = g2o.RobustKernelHuber(np.sqrt(5.991))
 
-    if LOCAL_WINDOW is None:
+    if local_window is None:
       local_frames = self.frames
     else:
-      local_frames = self.frames[-LOCAL_WINDOW:]
+      local_frames = self.frames[-local_window:]
 
     # add frames to graph
     for f in self.frames:
@@ -79,7 +88,7 @@ class Map(object):
       pt.set_id(p.id + PT_ID_OFFSET)
       pt.set_estimate(p.pt[0:3])
       pt.set_marginalized(True)
-      pt.set_fixed(False)
+      pt.set_fixed(fix_points)
       opt.add_vertex(pt)
 
       for f in p.frames:
@@ -92,7 +101,8 @@ class Map(object):
         edge.set_robust_kernel(robust_kernel)
         opt.add_edge(edge)
         
-    #opt.set_verbose(True)
+    if verbose:
+      opt.set_verbose(True)
     opt.initialize_optimization()
     opt.optimize(50)
 
@@ -104,39 +114,40 @@ class Map(object):
       f.pose = np.linalg.inv(poseRt(R, t))
 
     # put points back (and cull)
-    new_points = []
-    for p in self.points:
-      vert = opt.vertex(p.id + PT_ID_OFFSET)
-      if vert is None:
+    if not fix_points:
+      new_points = []
+      for p in self.points:
+        vert = opt.vertex(p.id + PT_ID_OFFSET)
+        if vert is None:
+          new_points.append(p)
+          continue
+        est = vert.estimate()
+
+        # 2 match point that's old
+        old_point = len(p.frames) == 2 and p.frames[-1] not in local_frames
+
+        # compute reprojection error
+        errs = []
+        for f in p.frames:
+          uv = f.kpus[f.pts.index(p)]
+          proj = np.dot(np.dot(f.K, f.pose[:3]),
+                        np.array([est[0], est[1], est[2], 1.0]))
+          proj = proj[0:2] / proj[2]
+          errs.append(np.linalg.norm(proj-uv))
+
+        # cull
+        """
+        if (old_point and np.mean(errs) > 30) or np.mean(errs) > 100:
+          p.delete()
+          continue
+        """
+
+        p.pt = np.array(est)
         new_points.append(p)
-        continue
-      est = vert.estimate()
+      self.points = new_points
 
-      # 2 match point that's old
-      old_point = len(p.frames) == 2 and p.frames[-1] not in local_frames
-
-      # compute reprojection error
-      errs = []
-      for f in p.frames:
-        uv = f.kpus[f.pts.index(p)]
-        proj = np.dot(np.dot(f.K, f.pose[:3]),
-                      np.array([est[0], est[1], est[2], 1.0]))
-        proj = proj[0:2] / proj[2]
-        errs.append(np.linalg.norm(proj-uv))
-
-      # cull
-      """
-      if (old_point and np.mean(errs) > 30) or np.mean(errs) > 100:
-        p.delete()
-        continue
-      """
-
-      p.pt = np.array(est)
-      new_points.append(p)
-
-    self.points = new_points
-
-    return opt.chi2()
+    #print(dir(opt))
+    return opt.active_chi2()
 
   # *** viewer ***
 

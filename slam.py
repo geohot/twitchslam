@@ -48,6 +48,10 @@ def process_frame(img):
     if f2.pts[idx] is not None:
       f2.pts[idx].add_observation(f1, idx1[i])
 
+  # pose optimization
+  pose_opt = mapp.optimize(local_window=1, fix_points=True)
+  print("Pose:     %f" % pose_opt)
+
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
   # locally in front of camera
