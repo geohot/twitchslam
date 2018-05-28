@@ -97,8 +97,9 @@ def process_frame(img):
   pts4d /= pts4d[:, 3:]
 
   # locally in front of camera
-  pts_tri_local = np.dot(f1.pose, pts4d.T).T
-  good_pts4d &= pts_tri_local[:, 2] > 0
+  # NOTE: This check is broken and maybe unneeded
+  #pts_tri_local = np.dot(f1.pose, pts4d.T).T
+  #good_pts4d &= pts_tri_local[:, 2] > 0
 
   print("Adding:   %d new points, %d search by projection" % (np.sum(good_pts4d), sbp_pts_count))
 
