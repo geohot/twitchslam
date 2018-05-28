@@ -17,6 +17,7 @@ class Point(object):
     mapp.points.append(self)
 
   def add_observation(self, frame, idx):
+    frame.pts[idx] = self
     self.frames.append(frame)
     self.idxs.append(idx)
 
