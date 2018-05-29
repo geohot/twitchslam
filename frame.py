@@ -67,14 +67,13 @@ def match_frames(f1, f2):
       p1 = f1.kps[m.queryIdx]
       p2 = f2.kps[m.trainIdx]
 
-      # travel less than 10% of diagonal and be within orb distance 32
-      if np.linalg.norm((p1-p2)) < 0.1*np.linalg.norm([f1.w, f1.h]) and m.distance < 32:
+      # be within orb distance 32
+      if m.distance < 32:
         # keep around indices
         # TODO: refactor this to not be O(N^2)
         if m.queryIdx not in idx1 and m.trainIdx not in idx2:
           idx1.append(m.queryIdx)
           idx2.append(m.trainIdx)
-
           ret.append((p1, p2))
 
   # no duplicates
@@ -109,9 +108,20 @@ class Frame(object):
     self.h, self.w = img.shape[0:2]
 
     self.kpus, self.des = extract(img)
-    self.kd = cKDTree(self.kpus)
-    self.kps = normalize(self.Kinv, self.kpus)
-    self.pts = [None]*len(self.kps)
-
+    self.pts = [None]*len(self.kpus)
     self.id = mapp.add_frame(self)
+
+  # normalized keypoints
+  @property
+  def kps(self):
+    if not hasattr(self, '_kps'):
+      self._kps = normalize(self.Kinv, self.kpus)
+    return self._kps
+
+  # KD tree of unnormalized keypoints
+  @property
+  def kd(self):
+    if not hasattr(self, '_kd'):
+      self._kd = cKDTree(self.kpus)
+    return self._kd
 
