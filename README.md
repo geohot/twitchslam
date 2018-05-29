@@ -57,6 +57,7 @@ DONE
 * Add search by projection to refind old map points (done)
  * Check if points are in the field of view of the camera (done)
 * BUGFIX: Fix moving up! (y axis flipped? nah, it's okay)
+* Add loading and saving of map support
 
 TODO
 -----
@@ -67,7 +68,6 @@ TODO
 * Add multiscale feature extractor
 * Add Linux libraries and OS check
 * Profile and speed up more
-* Add loading and saving of map support
 * Add automated test for freiburg running on commit
  * Check accuracy with ground truth
 

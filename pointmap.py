@@ -1,4 +1,4 @@
-from frame import poseRt
+from frame import poseRt, Frame
 import time
 import numpy as np
 import g2o
@@ -11,12 +11,15 @@ class Point(object):
   # A Point is a 3-D point in the world
   # Each Point is observed in multiple Frames
 
-  def __init__(self, mapp, loc, color):
-    self.pt = loc
+  def __init__(self, mapp, loc, color, tid=None):
+    self.pt = np.array(loc)
     self.frames = []
     self.idxs = []
     self.color = np.copy(color)
-    self.id = mapp.add_point(self)
+    if tid is None:
+      self.id = mapp.add_point(self)
+    else:
+      self.id = tid
 
   def homogeneous(self):
     return np.array([self.pt[0], self.pt[1], self.pt[2], 1.0])
@@ -50,7 +53,33 @@ class Map(object):
         'id': f.id, 'K': f.K.tolist(), 'pose': f.pose.tolist(), 'h': f.h, 'w': f.w, 
         'kpus': f.kpus.tolist(), 'des': f.des.tolist(),
         'pts': [p.id if p is not None else -1 for p in f.pts]})
+    ret['max_frame'] = self.max_frame
+    ret['max_point'] = self.max_point
     return json.dumps(ret)
+
+  def deserialize(self, s):
+    ret = json.loads(s)
+    self.max_frame = ret['max_frame']
+    self.max_point = ret['max_point']
+    self.points = []
+    self.frames = []
+
+    pids = {}
+    for p in ret['points']:
+      pp = Point(self, p['pt'], p['color'], p['id'])
+      self.points.append(pp)
+      pids[p['id']] = pp
+
+    for f in ret['frames']:
+      ff = Frame(self, None, f['K'], f['pose'], f['id'])
+      ff.w, ff.h = f['w'], f['h']
+      ff.kpus = np.array(f['kpus'])
+      ff.des = np.array(f['des'])
+      ff.pts = [None] * len(ff.kpus)
+      for i,p in enumerate(f['pts']):
+        if p != -1:
+          ff.pts[i] = pids[p]
+      self.frames.append(ff)
 
   def add_point(self, point):
     ret = self.max_point

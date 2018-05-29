@@ -104,14 +104,23 @@ def match_frames(f1, f2):
   return idx1[inliers], idx2[inliers], Rt
 
 class Frame(object):
-  def __init__(self, mapp, img, K, pose=np.eye(4)):
-    self.K = K
-    self.pose = pose
-    self.h, self.w = img.shape[0:2]
+  def __init__(self, mapp, img, K, pose=np.eye(4), tid=None):
+    self.K = np.array(K)
+    self.pose = np.array(pose)
 
-    self.kpus, self.des = extract(img)
-    self.pts = [None]*len(self.kpus)
-    self.id = mapp.add_frame(self)
+    if img is not None:
+      self.h, self.w = img.shape[0:2]
+      self.kpus, self.des = extract(img)
+      self.pts = [None]*len(self.kpus)
+    else:
+      # fill in later
+      self.h, self.w = 0, 0
+      self.kpus, self.des, self.pts = None, None, None
+
+    if tid is None:
+      self.id = mapp.add_frame(self)
+    else:
+      self.id = tid
 
   # inverse of intrinsics matrix
   @property

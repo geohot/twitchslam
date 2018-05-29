@@ -172,6 +172,13 @@ if __name__ == "__main__":
 
   disp2d = Display2D(W, H)
 
+  """
+  mapp.deserialize(open('map.json').read())
+  while 1:
+    disp3d.paint(mapp)
+    time.sleep(1)
+  """
+
   i = 0
   while cap.isOpened():
     ret, frame = cap.read()
