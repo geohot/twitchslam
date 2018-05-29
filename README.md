@@ -29,6 +29,15 @@ F=525 ./slam.py videos/test_freiburgxyz525.mp4
 REVERSE=1 F=984 ./slam.py videos/test_kitti984_reverse.mp4
 ```
 
+Classes
+-----
+
+* Frame -- An image with extracted features
+* Point -- A 3-D point in the Map and it's 2-D Frame correspondences
+* Map -- A collection of points and frames
+* Display2D -- SDL2 display of the current image
+* Display3D -- Pangolin display of the current map
+
 Libraries Used
 -----
 

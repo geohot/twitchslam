@@ -6,7 +6,7 @@ sys.path.append("lib/macosx")
 
 import time
 import cv2
-from display import Display
+from display import Display2D, Display3D
 from frame import Frame, denormalize, match_frames
 import numpy as np
 import g2o
@@ -14,7 +14,8 @@ from pointmap import Map, Point
 
 # main classes
 mapp = Map()
-disp = None
+disp2d = None
+disp3d = None
 
 def hamming_distance(a, b):
   r = (1 << np.arange(8))[:,None]
@@ -126,8 +127,8 @@ def process_frame(img):
     cv2.line(img, (u1, v1), (u2, v2), color=(255,0,0))
 
   # 2-D display
-  if disp is not None:
-    disp.paint(img)
+  if disp2d is not None:
+    disp2d.paint(img)
 
   # optimize the map
   if frame.id >= 4 and frame.id%5 == 0:
@@ -135,7 +136,9 @@ def process_frame(img):
     print("Optimize: %f units of error" % err)
 
   # 3-D display
-  mapp.display()
+  if disp3d is not None:
+    disp3d.paint(mapp)
+
   print("Map:      %d points, %d frames" % (len(mapp.points), len(mapp.frames)))
   print("Time:     %.2f ms" % ((time.time()-start_time)*1000.0))
 
@@ -145,7 +148,7 @@ if __name__ == "__main__":
     exit(-1)
     
   # create displays and open file
-  mapp.create_viewer()
+  disp3d = Display3D()
   cap = cv2.VideoCapture(sys.argv[1])
 
   # camera parameters
@@ -167,7 +170,7 @@ if __name__ == "__main__":
   K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
   Kinv = np.linalg.inv(K)
 
-  disp = Display(W, H)
+  disp2d = Display2D(W, H)
 
   i = 0
   while cap.isOpened():
