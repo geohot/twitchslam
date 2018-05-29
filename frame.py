@@ -117,10 +117,7 @@ class Frame(object):
       self.h, self.w = 0, 0
       self.kpus, self.des, self.pts = None, None, None
 
-    if tid is None:
-      self.id = mapp.add_frame(self)
-    else:
-      self.id = tid
+    self.id = tid if tid is not None else mapp.add_frame(self)
 
   # inverse of intrinsics matrix
   @property

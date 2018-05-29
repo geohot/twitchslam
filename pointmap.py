@@ -16,10 +16,7 @@ class Point(object):
     self.frames = []
     self.idxs = []
     self.color = np.copy(color)
-    if tid is None:
-      self.id = mapp.add_point(self)
-    else:
-      self.id = tid
+    self.id = tid if tid is not None else mapp.add_point(self)
 
   def homogeneous(self):
     return np.array([self.pt[0], self.pt[1], self.pt[2], 1.0])
