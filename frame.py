@@ -101,15 +101,21 @@ def match_frames(f1, f2):
   return idx1[inliers], idx2[inliers], Rt
 
 class Frame(object):
-  def __init__(self, mapp, img, K):
+  def __init__(self, mapp, img, K, pose=np.eye(4)):
     self.K = K
-    self.Kinv = np.linalg.inv(self.K)
-    self.pose = np.eye(4)
+    self.pose = pose
     self.h, self.w = img.shape[0:2]
 
     self.kpus, self.des = extract(img)
-    self.pts = [None]*len(self.kpus)
     self.id = mapp.add_frame(self)
+    self.pts = [None]*len(self.kpus)
+
+  # inverse of intrinsics matrix
+  @property
+  def Kinv(self):
+    if not hasattr(self, '_Kinv'):
+      self._Kinv = np.linalg.inv(self.K)
+    return self._Kinv
 
   # normalized keypoints
   @property
