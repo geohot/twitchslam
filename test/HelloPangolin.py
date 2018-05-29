@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # https://github.com/stevenlovegrove/Pangolin/tree/master/examples/HelloPangolin
 
+import sys
+
+sys.path.append("../lib/macosx")
+sys.path.append("../lib/linux")
+
 import OpenGL.GL as gl
 import pangolin
 
