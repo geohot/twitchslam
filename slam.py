@@ -38,8 +38,10 @@ def process_frame(img):
     velocity = np.dot(f2.pose, np.linalg.inv(mapp.frames[-3].pose))
     f1.pose = np.dot(velocity, f2.pose)
 
+  # add new observations if the point is already observed in the previous frame
+  # TODO: consider tradeoff doing this before/after search by projection
   for i,idx in enumerate(idx2):
-    if f2.pts[idx] is not None:
+    if f2.pts[idx] is not None and f1.pts[idx1[i]] is None:
       f2.pts[idx].add_observation(f1, idx1[i])
 
   # pose optimization
@@ -70,6 +72,7 @@ def process_frame(img):
               sbp_pts_count += 1
               break
 
+  # triangulate the points we don't have matches for
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
   # reject pts without enough "parallax" (this right?)
@@ -86,6 +89,7 @@ def process_frame(img):
 
   print("Adding:   %d new points, %d search by projection" % (np.sum(good_pts4d), sbp_pts_count))
 
+  # adding new points to the map from pairwise matches
   for i,p in enumerate(pts4d):
     if not good_pts4d[i]:
       continue
@@ -94,20 +98,20 @@ def process_frame(img):
     pt.add_observation(f1, idx1[i])
     pt.add_observation(f2, idx2[i])
 
-  for i1, i2 in zip(idx1, idx2):
-    u1, v1 = int(round(f1.kpus[i1][0])), int(round(f1.kpus[i1][1]))
-    u2, v2 = int(round(f2.kpus[i2][0])), int(round(f2.kpus[i2][1]))
-    if f1.pts[i1] is not None:
-      if len(f1.pts[i1].frames) >= 5:
-        cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
-      else:
-        cv2.circle(img, (u1, v1), color=(0,128,0), radius=3)
-    else:
-      cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
-    cv2.line(img, (u1, v1), (u2, v2), color=(255,0,0))
-
   # 2-D display
   if disp2d is not None:
+    # paint annotations on the image
+    for i1, i2 in zip(idx1, idx2):
+      u1, v1 = int(round(f1.kpus[i1][0])), int(round(f1.kpus[i1][1]))
+      u2, v2 = int(round(f2.kpus[i2][0])), int(round(f2.kpus[i2][1]))
+      if f1.pts[i1] is not None:
+        if len(f1.pts[i1].frames) >= 5:
+          cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
+        else:
+          cv2.circle(img, (u1, v1), color=(0,128,0), radius=3)
+      else:
+        cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
+      cv2.line(img, (u1, v1), (u2, v2), color=(255,0,0))
     disp2d.paint(img)
 
   # optimize the map
