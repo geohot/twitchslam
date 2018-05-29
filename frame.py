@@ -113,6 +113,5 @@ class Frame(object):
     self.kps = normalize(self.Kinv, self.kpus)
     self.pts = [None]*len(self.kps)
 
-    self.id = len(mapp.frames)
-    mapp.frames.append(self)
+    self.id = mapp.add_frame(self)
 

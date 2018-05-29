@@ -2,6 +2,7 @@ from frame import poseRt
 import time
 import numpy as np
 import g2o
+import json
 
 LOCAL_WINDOW = 20
 #LOCAL_WINDOW = None
@@ -15,20 +16,13 @@ class Point(object):
     self.frames = []
     self.idxs = []
     self.color = np.copy(color)
-    
-    self.id = mapp.max_point
-    mapp.max_point += 1
-    mapp.points.append(self)
+    self.id = mapp.add_point(self)
 
   def homogeneous(self):
     return np.array([self.pt[0], self.pt[1], self.pt[2], 1.0])
 
   def orb(self):
-    # TODO: average orbs in hamming space?
-    des = []
-    for f in self.frames:
-      des.append(f.des[f.pts.index(self)])
-    return des
+    return [f.des[f.pts.index(self)] for f in self.frames]
   
   def delete(self):
     for f in self.frames:
@@ -44,7 +38,20 @@ class Map(object):
   def __init__(self):
     self.frames = []
     self.points = []
+    self.max_frame = 0
     self.max_point = 0
+
+  def add_point(self, point):
+    ret = self.max_point
+    self.max_point += 1
+    self.points.append(point)
+    return ret
+
+  def add_frame(self, frame):
+    ret = self.max_frame
+    self.max_frame += 1
+    self.frames.append(frame)
+    return ret
 
   # *** optimizer ***
 
@@ -141,6 +148,5 @@ class Map(object):
       print("Culled:   %d points" % (len(self.points) - len(new_points)))
       self.points = new_points
 
-    #print(dir(opt))
     return opt.active_chi2()
 
