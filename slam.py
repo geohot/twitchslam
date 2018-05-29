@@ -7,34 +7,16 @@ sys.path.append("lib/macosx")
 import time
 import cv2
 from display import Display2D, Display3D
-from frame import Frame, denormalize, match_frames
+from frame import Frame, match_frames
 import numpy as np
 import g2o
 from pointmap import Map, Point
+from helpers import hamming_distance, triangulate
 
 # main classes
 mapp = Map()
 disp2d = None
 disp3d = None
-
-def hamming_distance(a, b):
-  r = (1 << np.arange(8))[:,None]
-  return np.count_nonzero((np.bitwise_xor(a,b) & r) != 0)
-
-def triangulate(pose1, pose2, pts1, pts2):
-  ret = np.zeros((pts1.shape[0], 4))
-  for i, p in enumerate(zip(pts1, pts2)):
-    A = np.zeros((4,4))
-    A[0] = p[0][0] * pose1[2] - pose1[0]
-    A[1] = p[0][1] * pose1[2] - pose1[1]
-    A[2] = p[1][0] * pose2[2] - pose2[0]
-    A[3] = p[1][1] * pose2[2] - pose2[1]
-    _, _, vt = np.linalg.svd(A)
-    ret[i] = vt[3]
-  #print(pose1)
-  #print(pose2)
-  #print(ret[0:10]/ret[0:10, 3:])
-  return ret
 
 def process_frame(img):
   start_time = time.time()
@@ -113,10 +95,8 @@ def process_frame(img):
     pt.add_observation(f2, idx2[i])
 
   for i1, i2 in zip(idx1, idx2):
-    pt1 = f1.kps[i1]
-    pt2 = f2.kps[i2]
-    u1, v1 = denormalize(K, pt1)
-    u2, v2 = denormalize(K, pt2)
+    u1, v1 = int(round(f1.kpus[i1][0])), int(round(f1.kpus[i1][1]))
+    u2, v2 = int(round(f2.kpus[i2][0])), int(round(f2.kpus[i2][1]))
     if f1.pts[i1] is not None:
       if len(f1.pts[i1].frames) >= 5:
         cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
