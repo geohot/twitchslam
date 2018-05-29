@@ -22,11 +22,11 @@ class Point(object):
     return np.array([self.pt[0], self.pt[1], self.pt[2], 1.0])
 
   def orb(self):
-    return [f.des[f.pts.index(self)] for f in self.frames]
+    return [f.des[idx] for f,idx in zip(self.frames, self.idxs)]
   
   def delete(self):
-    for f in self.frames:
-      f.pts[f.pts.index(self)] = None
+    for f,idx in zip(self.frames, self.idxs):
+      f.pts[idx] = None
     del self
 
   def add_observation(self, frame, idx):
@@ -40,6 +40,17 @@ class Map(object):
     self.points = []
     self.max_frame = 0
     self.max_point = 0
+
+  def serialize(self):
+    ret = {}
+    ret['points'] = [{'id': p.id, 'pt': p.pt.tolist(), 'color': p.color.tolist()} for p in self.points]
+    ret['frames'] = []
+    for f in self.frames:
+      ret['frames'].append({
+        'id': f.id, 'K': f.K.tolist(), 'pose': f.pose.tolist(), 'h': f.h, 'w': f.w, 
+        'kpus': f.kpus.tolist(), 'des': f.des.tolist(),
+        'pts': [p.id if p is not None else -1 for p in f.pts]})
+    return json.dumps(ret)
 
   def add_point(self, point):
     ret = self.max_point
@@ -94,11 +105,11 @@ class Map(object):
       pt.set_fixed(fix_points)
       opt.add_vertex(pt)
 
-      for f in p.frames:
+      for f,idx in zip(p.frames, p.idxs):
         edge = g2o.EdgeProjectP2MC()
         edge.set_vertex(0, pt)
         edge.set_vertex(1, opt.vertex(f.id))
-        uv = f.kpus[f.pts.index(p)]
+        uv = f.kpus[idx]
         edge.set_measurement(uv)
         edge.set_information(np.eye(2))
         edge.set_robust_kernel(robust_kernel)
@@ -131,8 +142,8 @@ class Map(object):
 
         # compute reprojection error
         errs = []
-        for f in p.frames:
-          uv = f.kpus[f.pts.index(p)]
+        for f,idx in zip(p.frames, p.idxs):
+          uv = f.kpus[idx]
           proj = np.dot(np.dot(f.K, f.pose[:3]),
                         np.array([est[0], est[1], est[2], 1.0]))
           proj = proj[0:2] / proj[2]

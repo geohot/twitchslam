@@ -181,4 +181,10 @@ if __name__ == "__main__":
     else:
       break
     i += 1
+    """
+    if i == 10:
+      with open('map.json', 'w') as f:
+        f.write(mapp.serialize())
+        exit(0)
+    """
 

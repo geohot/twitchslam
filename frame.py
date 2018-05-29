@@ -60,7 +60,8 @@ def match_frames(f1, f2):
 
   # Lowe's ratio test
   ret = []
-  idx1,idx2 = [], []
+  idx1, idx2 = [], []
+  idx1s, idx2s = set(), set()
 
   for m,n in matches:
     if m.distance < 0.75*n.distance:
@@ -71,9 +72,11 @@ def match_frames(f1, f2):
       if m.distance < 32:
         # keep around indices
         # TODO: refactor this to not be O(N^2)
-        if m.queryIdx not in idx1 and m.trainIdx not in idx2:
+        if m.queryIdx not in idx1s and m.trainIdx not in idx2s:
           idx1.append(m.queryIdx)
           idx2.append(m.trainIdx)
+          idx1s.add(m.queryIdx)
+          idx2s.add(m.trainIdx)
           ret.append((p1, p2))
 
   # no duplicates
@@ -107,8 +110,8 @@ class Frame(object):
     self.h, self.w = img.shape[0:2]
 
     self.kpus, self.des = extract(img)
-    self.id = mapp.add_frame(self)
     self.pts = [None]*len(self.kpus)
+    self.id = mapp.add_frame(self)
 
   # inverse of intrinsics matrix
   @property
