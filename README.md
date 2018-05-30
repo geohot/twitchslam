@@ -25,6 +25,9 @@ export F=500       # Focal length (in px)
 # good example
 F=525 ./slam.py videos/test_freiburgxyz525.mp4
 
+# ground truth (broken!)
+F=525 ./slam.py videos/test_freiburgrpy525.mp4 videos/groundtruth/freiburgrpy.txt 
+
 # kitti example
 REVERSE=1 F=984 ./slam.py videos/test_kitti984_reverse.mp4
 ```

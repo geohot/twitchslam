@@ -12,14 +12,16 @@ from frame import Frame, match_frames
 import numpy as np
 import g2o
 from pointmap import Map, Point
-from helpers import hamming_distance, triangulate
+from helpers import hamming_distance, triangulate, quaternion_matrix
+
+np.set_printoptions(suppress=True)
 
 # main classes
 mapp = Map()
 disp2d = None
 disp3d = None
 
-def process_frame(img):
+def process_frame(img, pose=None):
   start_time = time.time()
   img = cv2.resize(img, (W,H))
   frame = Frame(mapp, img, K)
@@ -31,6 +33,12 @@ def process_frame(img):
 
   idx1, idx2, Rt = match_frames(f1, f2)
 
+  # add new observations if the point is already observed in the previous frame
+  # TODO: consider tradeoff doing this before/after search by projection
+  for i,idx in enumerate(idx2):
+    if f2.pts[idx] is not None and f1.pts[idx1[i]] is None:
+      f2.pts[idx].add_observation(f1, idx1[i])
+
   if frame.id < 5:
     # get initial positions from fundamental matrix
     f1.pose = np.dot(Rt, f2.pose)
@@ -39,17 +47,15 @@ def process_frame(img):
     velocity = np.dot(f2.pose, np.linalg.inv(mapp.frames[-3].pose))
     f1.pose = np.dot(velocity, f2.pose)
 
-  # add new observations if the point is already observed in the previous frame
-  # TODO: consider tradeoff doing this before/after search by projection
-  for i,idx in enumerate(idx2):
-    if f2.pts[idx] is not None and f1.pts[idx1[i]] is None:
-      f2.pts[idx].add_observation(f1, idx1[i])
-
   # pose optimization
-  #print(f1.pose)
-  pose_opt = mapp.optimize(local_window=1, fix_points=True)
-  print("Pose:     %f" % pose_opt)
-  #print(f1.pose)
+  if pose is None:
+    #print(f1.pose)
+    pose_opt = mapp.optimize(local_window=1, fix_points=True)
+    print("Pose:     %f" % pose_opt)
+    #print(f1.pose)
+  else:
+    # have ground truth for pose
+    f1.pose = pose
 
   # search by projection
   sbp_pts_count = 0
@@ -126,6 +132,7 @@ def process_frame(img):
 
   print("Map:      %d points, %d frames" % (len(mapp.points), len(mapp.frames)))
   print("Time:     %.2f ms" % ((time.time()-start_time)*1000.0))
+  print(np.linalg.inv(f1.pose))
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
@@ -164,12 +171,49 @@ if __name__ == "__main__":
     time.sleep(1)
   """
 
+  # handle ground truth
+  def read_lines(x):
+    return filter(lambda x: x[0] != "#", open(x).read().strip().split("\n"))
+
+  gt_pose = None
+  if len(sys.argv) >= 3:
+    # read in and interpolate to frame time
+    timing = read_lines(sys.argv[2].replace(".txt", "_timings.txt"))
+    timing = np.array(list(map(lambda x: float(x.split(" ")[0]), timing)))
+    gtt = np.array(list(map(lambda x: list(map(float, x.split(" "))), read_lines(sys.argv[2]))))
+    gt = np.zeros((timing.shape[0], 1+3+4))
+    for i in range(1+3+4):
+      gt[:, i] = np.interp(timing, gtt[:, 0], gtt[:, i])
+    gt[:, 4:] /= np.linalg.norm(gt[:, 4:], axis=1)[:, None]
+
+    # extract rotation and translation
+    gt_R = quaternion_matrix(gt[:, 4:])
+    gt_t = gt[:, 1:4]
+
+    # unapply the capture -> camera frame
+    camera_frame_from_capture_frame = np.array([[0,0,1], [1,0,0], [0,1,0]])
+    #gt_R = np.matmul(camera_frame_from_capture_frame, gt_R)
+
+    # this is at least right in the presence of small rotation
+    gt_t = np.matmul(gt_R[0], gt_t.T).T
+    gt_t -= gt_t[0]
+    gt_t = np.matmul(camera_frame_from_capture_frame, gt_t.T).T
+
+    # this is wrong!
+    gt_R = np.matmul(camera_frame_from_capture_frame, gt_R)
+    gt_R = np.matmul(np.linalg.inv(gt_R[0]), gt_R)
+
+    gt_pose = np.zeros((gt.shape[0], 4, 4))
+    gt_pose[:, 3, 3] = 1.0
+    gt_pose[:, :3, :3] = gt_R
+    gt_pose[:, :3, 3] = gt_t * 50.0
+
   i = 0
   while cap.isOpened():
     ret, frame = cap.read()
     print("\n*** frame %d/%d ***" % (i, CNT))
     if ret == True:
-      process_frame(frame)
+      process_frame(frame, None if gt_pose is None else np.linalg.inv(gt_pose[i]))
     else:
       break
     i += 1
