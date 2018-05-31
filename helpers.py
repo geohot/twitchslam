@@ -1,14 +1,17 @@
 import os
 import numpy as np
 
+# q = [qx,qy,qz,qw]
+# NOT [qw,qx,qy,qz]
 def _quaternion_matrix(q):
   n = np.dot(q, q)
   q *= np.sqrt(2.0 / n)
   q = np.outer(q, q)
   return np.array([
-      [1.0-q[2, 2]-q[3, 3],     q[1, 2]-q[3, 0],     q[1, 3]+q[2, 0]],
-      [    q[1, 2]+q[3, 0], 1.0-q[1, 1]-q[3, 3],     q[2, 3]-q[1, 0]],
-      [    q[1, 3]-q[2, 0],     q[2, 3]+q[1, 0], 1.0-q[1, 1]-q[2, 2]]])
+      [1.0-q[1, 1]-q[2, 2],     q[0, 1]-q[2, 3],     q[0, 2]+q[1, 3]],
+      [    q[0, 1]+q[2, 3], 1.0-q[0, 0]-q[2, 2],     q[1, 2]-q[0, 3]],
+      [    q[0, 2]-q[1, 3],     q[1, 2]+q[0, 3], 1.0-q[0, 0]-q[1, 1]]],
+      dtype=np.float64)
 
 # TODO: Write this not dumb
 #quaternion_matrix = np.vectorize(_quaternion_matrix)

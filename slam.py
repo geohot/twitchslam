@@ -190,23 +190,14 @@ if __name__ == "__main__":
     gt_R = quaternion_matrix(gt[:, 4:])
     gt_t = gt[:, 1:4]
 
-    # unapply the capture -> camera frame
-    camera_frame_from_capture_frame = np.array([[0,0,1], [1,0,0], [0,1,0]])
-    #gt_R = np.matmul(camera_frame_from_capture_frame, gt_R)
-
-    # this is at least right in the presence of small rotation
-    gt_t = np.matmul(gt_R[0], gt_t.T).T
-    gt_t -= gt_t[0]
-    gt_t = np.matmul(camera_frame_from_capture_frame, gt_t.T).T
-
-    # this is wrong!
-    gt_R = np.matmul(camera_frame_from_capture_frame, gt_R)
-    gt_R = np.matmul(np.linalg.inv(gt_R[0]), gt_R)
-
+    # 4x4 pose matrix
     gt_pose = np.zeros((gt.shape[0], 4, 4))
-    gt_pose[:, 3, 3] = 1.0
     gt_pose[:, :3, :3] = gt_R
-    gt_pose[:, :3, 3] = gt_t * 50.0
+    gt_pose[:, :3, 3] = gt_t
+    gt_pose[:, 3, 3] = 1.0
+
+    # bring pose into first frame
+    gt_pose = np.matmul(np.linalg.inv(gt_pose[0]), gt_pose)
 
   i = 0
   while cap.isOpened():
