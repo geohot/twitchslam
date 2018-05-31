@@ -82,17 +82,13 @@ def process_frame(img, pose=None):
   # triangulate the points we don't have matches for
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
-  # reject pts without enough "parallax" (this right?)
-  pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
-  good_pts4d &= np.abs(pts4d[:, 3]) > 0.01
-
-  # homogeneous 3-D coords
-  pts4d /= pts4d[:, 3:]
-
-  # locally in front of camera
-  # NOTE: Is this check correct?
-  pts_tri_local = np.dot(f1.pose, pts4d.T).T
-  good_pts4d &= pts_tri_local[:, 2] > 0
+  # do triangulation in local frame
+  lpose = np.dot(f1.pose, np.linalg.inv(f2.pose))
+  pts_local = triangulate(lpose, np.eye(4), f1.kps[idx1], f2.kps[idx2])
+  good_pts4d &= np.abs(pts_local[:, 3]) > 0.01
+  pts_local /= pts_local[:, 3:]       # homogeneous 3-D coords
+  good_pts4d &= pts_local[:, 2] > 0   # locally in front of camera
+  pts4d = np.dot(np.linalg.inv(f2.pose), pts_local.T).T
 
   print("Adding:   %d new points, %d search by projection" % (np.sum(good_pts4d), sbp_pts_count))
 
