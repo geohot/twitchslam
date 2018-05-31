@@ -84,15 +84,15 @@ def process_frame(img, pose=None):
 
   # reject pts without enough "parallax" (this right?)
   pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
-  good_pts4d &= np.abs(pts4d[:, 3]) > 0.005
+  good_pts4d &= np.abs(pts4d[:, 3]) > 0.01
 
   # homogeneous 3-D coords
   pts4d /= pts4d[:, 3:]
 
   # locally in front of camera
-  # NOTE: This check is broken and maybe unneeded
-  #pts_tri_local = np.dot(f1.pose, pts4d.T).T
-  #good_pts4d &= pts_tri_local[:, 2] > 0
+  # NOTE: Is this check correct?
+  pts_tri_local = np.dot(f1.pose, pts4d.T).T
+  good_pts4d &= pts_tri_local[:, 2] > 0
 
   print("Adding:   %d new points, %d search by projection" % (np.sum(good_pts4d), sbp_pts_count))
 
@@ -174,6 +174,8 @@ if __name__ == "__main__":
   gt_pose = None
   if len(sys.argv) >= 3:
     gt_pose = np.load(sys.argv[2])['pose']
+    # add scale param?
+    #gt_pose[:, :3, 3] *= 20
 
   i = 0
   while cap.isOpened():
