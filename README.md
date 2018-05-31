@@ -73,7 +73,10 @@ TODO
 * Add optimizer for F
 * Add multiscale feature extractor
 * Add Linux libraries and OS check
-* Profile and speed up more
+* Profile and speed up more (tomorrow 6/1/18)
+ * Profile with flame!
+ * Search by projection less stupidly
+ * Don't add all points to the optimization graph for pose at least
 * Add automated test for freiburg running on commit
  * Check accuracy with ground truth
 
