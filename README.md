@@ -30,6 +30,9 @@ F=525 ./slam.py videos/test_freiburgrpy525.mp4 videos/groundtruth/freiburgrpy.tx
 
 # kitti example
 REVERSE=1 F=984 ./slam.py videos/test_kitti984_reverse.mp4
+
+# extract ground truth
+tools/parse_ground_truth.py videos/groundtruth/freiburgrpy.txt videos/test_freiburgrpy525.npz 
 ```
 
 Classes
