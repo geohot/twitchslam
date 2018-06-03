@@ -12,7 +12,7 @@ from frame import Frame, match_frames
 import numpy as np
 import g2o
 from pointmap import Map, Point
-from helpers import hamming_distance, triangulate
+from helpers import triangulate
 
 np.set_printoptions(suppress=True)
 
@@ -43,7 +43,7 @@ def process_frame(img, pose=None):
     # get initial positions from fundamental matrix
     f1.pose = np.dot(Rt, f2.pose)
   else:
-    # kinematic model
+    # kinematic model (not used)
     velocity = np.dot(f2.pose, np.linalg.inv(mapp.frames[-3].pose))
     f1.pose = np.dot(velocity, f2.pose)
 
@@ -61,24 +61,32 @@ def process_frame(img, pose=None):
 
   # search by projection
   if len(mapp.points) > 0:
+    # project *all* the map points into the current frame
     map_points = np.array([p.homogeneous() for p in mapp.points])
     projs = np.dot(np.dot(K, f1.pose[:3]), map_points.T).T
     projs = projs[:, 0:2] / projs[:, 2:]
+
+    # only the points that fit in the frame
     good_pts = (projs[:, 0] > 0) & (projs[:, 0] < W) & \
                (projs[:, 1] > 0) & (projs[:, 1] < H)
+
     for i, p in enumerate(mapp.points):
       if not good_pts[i]:
+        # point not visible in frame
         continue
-      q = f1.kd.query_ball_point(projs[i], 5)
-      for m_idx in q:
+      if f1 in p.frames:
+        # we already matched this map point to this frame
+        # TODO: understand this better
+        continue
+      for m_idx in f1.kd.query_ball_point(projs[i], 2):
+        # if point unmatched
         if f1.pts[m_idx] is None:
-          # if any descriptors within 32
-          for o in p.orb():
-            o_dist = hamming_distance(o, f1.des[m_idx])
-            if o_dist < 32.0:
-              p.add_observation(f1, m_idx)
-              sbp_pts_count += 1
-              break
+          b_dist = p.orb_distance(f1.des[m_idx])
+          # if any descriptors within 64
+          if b_dist < 64.0:
+            p.add_observation(f1, m_idx)
+            sbp_pts_count += 1
+            break
 
   # triangulate the points we don't have matches for
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])

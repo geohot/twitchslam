@@ -1,4 +1,4 @@
-from helpers import poseRt
+from helpers import poseRt, hamming_distance
 from frame import Frame
 import time
 import numpy as np
@@ -24,6 +24,9 @@ class Point(object):
 
   def orb(self):
     return [f.des[idx] for f,idx in zip(self.frames, self.idxs)]
+
+  def orb_distance(self, des):
+    return min([hamming_distance(o, des) for o in self.orb()])
   
   def delete(self):
     for f,idx in zip(self.frames, self.idxs):
@@ -31,6 +34,8 @@ class Point(object):
     del self
 
   def add_observation(self, frame, idx):
+    assert frame.pts[idx] is None
+    assert frame not in self.frames
     frame.pts[idx] = self
     self.frames.append(frame)
     self.idxs.append(idx)
@@ -93,7 +98,7 @@ class Map(object):
 
   # *** optimizer ***
   
-  alt = True
+  alt = False
   def optimize(self, local_window=LOCAL_WINDOW, fix_points=False, verbose=False):
     # create g2o optimizer
     opt = g2o.SparseOptimizer()
@@ -196,8 +201,8 @@ class Map(object):
         est = graph_points[p].estimate()
         p.pt = np.array(est)
 
-        # <= 3 match point that's old
-        old_point = len(p.frames) <= 3 and p.frames[-1].id+5 < self.max_frame
+        # <= 4 match point that's old
+        old_point = len(p.frames) <= 4 and p.frames[-1].id+7 < self.max_frame
 
         # compute reprojection error
         errs = []
