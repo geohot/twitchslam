@@ -107,8 +107,10 @@ class Map(object):
     else:
       local_frames = self.frames[-local_window:]
 
+    graph_frames, graph_points = {}, {}
+
     # add frames to graph
-    for f in self.frames:
+    for f in (local_frames if fix_points else self.frames):
       pose = np.linalg.inv(f.pose)
       sbacam = g2o.SBACam(g2o.SE3Quat(pose[0:3, 0:3], pose[0:3, 3]))
       sbacam.set_cam(f.K[0][0], f.K[1][1], f.K[0][2], f.K[1][2], 1.0)
@@ -118,6 +120,8 @@ class Map(object):
       v_se3.set_estimate(sbacam)
       v_se3.set_fixed(f.id <= 1 or f not in local_frames)
       opt.add_vertex(v_se3)
+
+      graph_frames[f] = v_se3
 
     # add points to frames
     PT_ID_OFFSET = 0x10000
@@ -132,6 +136,9 @@ class Map(object):
       pt.set_fixed(fix_points)
       opt.add_vertex(pt)
 
+      graph_points[p] = pt
+
+      # add edges
       for f,idx in zip(p.frames, p.idxs):
         edge = g2o.EdgeProjectP2MC()
         edge.set_vertex(0, pt)
@@ -141,6 +148,7 @@ class Map(object):
         edge.set_information(np.eye(2))
         edge.set_robust_kernel(robust_kernel)
         opt.add_edge(edge)
+
         
     if verbose:
       opt.set_verbose(True)
@@ -148,21 +156,18 @@ class Map(object):
     opt.optimize(20)
 
     # put frames back
-    for f in self.frames:
-      est = opt.vertex(f.id).estimate()
+    for f in graph_frames:
+      est = graph_frames[f].estimate()
       R = est.rotation().matrix()
       t = est.translation()
       f.pose = np.linalg.inv(poseRt(R, t))
 
     # put points back (and cull)
     if not fix_points:
-      new_points = []
-      for p in self.points:
-        vert = opt.vertex(p.id + PT_ID_OFFSET)
-        if vert is None:
-          new_points.append(p)
-          continue
-        est = vert.estimate()
+      culled_pt_count = 0
+      for p in graph_points:
+        est = graph_points[p].estimate()
+        p.pt = np.array(est)
 
         # <= 3 match point that's old
         old_point = len(p.frames) <= 3 and p.frames[-1].id+5 < self.max_frame
@@ -178,13 +183,11 @@ class Map(object):
 
         # cull
         if old_point or np.mean(errs) > 5:
+          culled_pt_count += 1
+          self.points.remove(p)
           p.delete()
-          continue
 
-        p.pt = np.array(est)
-        new_points.append(p)
-      print("Culled:   %d points" % (len(self.points) - len(new_points)))
-      self.points = new_points
+      print("Culled:   %d points" % (culled_pt_count))
 
     return opt.active_chi2()
 
