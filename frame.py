@@ -5,9 +5,7 @@ from scipy.spatial import cKDTree
 np.set_printoptions(suppress=True)
 
 from skimage.measure import ransac
-from skimage.transform import FundamentalMatrixTransform
-
-from helpers import add_ones, poseRt, fundamentalToRt, normalize
+from helpers import add_ones, poseRt, fundamentalToRt, normalize, EssentialMatrixTransform
 
 def extractFeatures(img):
   orb = cv2.ORB_create()
@@ -57,10 +55,10 @@ def match_frames(f1, f2):
 
   # fit matrix
   model, inliers = ransac((ret[:, 0], ret[:, 1]),
-                          FundamentalMatrixTransform,
+                          EssentialMatrixTransform,
                           min_samples=8,
                           residual_threshold=0.002,
-                          max_trials=30)
+                          max_trials=100)
   print("Matches:  %d -> %d -> %d -> %d" % (len(f1.des), len(matches), len(inliers), sum(inliers)))
   return idx1[inliers], idx2[inliers], fundamentalToRt(model.params)
 

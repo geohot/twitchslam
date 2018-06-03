@@ -153,7 +153,7 @@ class Map(object):
     if verbose:
       opt.set_verbose(True)
     opt.initialize_optimization()
-    opt.optimize(20)
+    opt.optimize(50)
 
     # put frames back
     for f in graph_frames:
