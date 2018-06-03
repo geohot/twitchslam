@@ -39,7 +39,7 @@ def process_frame(img, pose=None):
     if f2.pts[idx] is not None and f1.pts[idx1[i]] is None:
       f2.pts[idx].add_observation(f1, idx1[i])
 
-  if frame.id < 5:
+  if frame.id < 5 or True:
     # get initial positions from fundamental matrix
     f1.pose = np.dot(Rt, f2.pose)
   else:
@@ -57,8 +57,9 @@ def process_frame(img, pose=None):
     # have ground truth for pose
     f1.pose = pose
 
-  # search by projection
   sbp_pts_count = 0
+
+  # search by projection
   if len(mapp.points) > 0:
     map_points = np.array([p.homogeneous() for p in mapp.points])
     projs = np.dot(np.dot(K, f1.pose[:3]), map_points.T).T
@@ -171,7 +172,7 @@ if __name__ == "__main__":
   if len(sys.argv) >= 3:
     gt_pose = np.load(sys.argv[2])['pose']
     # add scale param?
-    #gt_pose[:, :3, 3] *= 20
+    gt_pose[:, :3, 3] *= 50
 
   i = 0
   while cap.isOpened():
