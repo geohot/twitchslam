@@ -12,7 +12,7 @@ from frame import Frame, match_frames
 import numpy as np
 import g2o
 from pointmap import Map, Point
-from helpers import triangulate
+from helpers import triangulate, add_ones
 
 np.set_printoptions(suppress=True)
 
@@ -91,24 +91,54 @@ def process_frame(img, pose=None):
   # triangulate the points we don't have matches for
   good_pts4d = np.array([f1.pts[i] is None for i in idx1])
 
-  # do triangulation in local frame
-  lpose = np.dot(f1.pose, np.linalg.inv(f2.pose))
-  pts_local = triangulate(lpose, np.eye(4), f1.kps[idx1], f2.kps[idx2])
-  good_pts4d &= np.abs(pts_local[:, 3]) > 0.01
-  pts_local /= pts_local[:, 3:]       # homogeneous 3-D coords
-  good_pts4d &= pts_local[:, 2] > 0   # locally in front of camera
-  pts4d = np.dot(np.linalg.inv(f2.pose), pts_local.T).T
-
-  print("Adding:   %d new points, %d search by projection" % (np.sum(good_pts4d), sbp_pts_count))
+  # do triangulation in global frame
+  pts4d = triangulate(f1.pose, f2.pose, f1.kps[idx1], f2.kps[idx2])
+  good_pts4d &= np.abs(pts4d[:, 3]) != 0
+  pts4d /= pts4d[:, 3:]       # homogeneous 3-D coords
 
   # adding new points to the map from pairwise matches
+  new_pts_count = 0
   for i,p in enumerate(pts4d):
     if not good_pts4d[i]:
       continue
-    u,v = int(round(f1.kpus[idx1[i],0])), int(round(f1.kpus[idx1[i],1]))
-    pt = Point(mapp, p[0:3], img[v,u])
+
+    # check parallax is large enough
+    # TODO: learn what parallax means
+    """
+    r1 = np.dot(f1.pose[:3, :3], add_ones(f1.kps[idx1[i]]))
+    r2 = np.dot(f2.pose[:3, :3], add_ones(f2.kps[idx2[i]]))
+    parallax = r1.dot(r2) / (np.linalg.norm(r1) * np.linalg.norm(r2))
+    if parallax >= 0.9998:
+      continue
+    """
+
+    # check points are in front of both cameras
+    pl1 = np.dot(f1.pose, p)
+    pl2 = np.dot(f2.pose, p)
+    if pl1[2] < 0 or pl2[2] < 0:
+      continue
+
+    # reproject
+    pp1 = np.dot(K, pl1[:3])
+    pp2 = np.dot(K, pl2[:3])
+
+    # check reprojection error
+    pp1 = (pp1[0:2] / pp1[2]) - f1.kpus[idx1[i]]
+    pp2 = (pp2[0:2] / pp2[2]) - f2.kpus[idx2[i]]
+    pp1 = np.sum(pp1**2)
+    pp2 = np.sum(pp2**2)
+    if pp1 > 2 or pp2 > 2:
+      continue
+
+    # add the point
+    color = img[int(round(f1.kpus[idx1[i],1])), int(round(f1.kpus[idx1[i],0]))]
+    pt = Point(mapp, p[0:3], color)
     pt.add_observation(f1, idx1[i])
     pt.add_observation(f2, idx2[i])
+    new_pts_count += 1
+
+  print("Adding:   %d new points, %d search by projection" % (new_pts_count, sbp_pts_count))
+
 
   # 2-D display
   if disp2d is not None:

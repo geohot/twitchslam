@@ -5,8 +5,8 @@ import numpy as np
 import g2o
 import json
 
-#LOCAL_WINDOW = 20
-LOCAL_WINDOW = None
+LOCAL_WINDOW = 20
+#LOCAL_WINDOW = None
 
 class Point(object):
   # A Point is a 3-D point in the world

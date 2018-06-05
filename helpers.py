@@ -19,7 +19,10 @@ def triangulate(pose1, pose2, pts1, pts2):
 
 # turn [[x,y]] -> [[x,y,1]]
 def add_ones(x):
-  return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)
+  if len(x.shape) == 1:
+    return np.array(x.tolist()+[1.0])
+  else:
+    return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)
 
 def poseRt(R, t):
   ret = np.eye(4)
