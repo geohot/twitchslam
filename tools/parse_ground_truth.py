@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# ffmpeg -pattern_type glob -i "*.png" ~/twitchslam/videos/test_freiburgroom525.mp4
+
 import sys
 import numpy as np
 
