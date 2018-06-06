@@ -158,7 +158,7 @@ def process_frame(img, pose=None):
 
   # optimize the map
   if frame.id >= 4 and frame.id%5 == 0:
-    err = mapp.optimize()
+    err = mapp.optimize() #verbose=True)
     print("Optimize: %f units of error" % err)
 
   # 3-D display
