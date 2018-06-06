@@ -5,6 +5,7 @@ import numpy as np
 import g2o
 import json
 from optimize_g2o import optimize as optimize_g2o
+from scipy.optimize import least_squares
 
 LOCAL_WINDOW = 20
 #LOCAL_WINDOW = None
@@ -100,7 +101,50 @@ class Map(object):
   # *** optimizer ***
   
   def optimize(self, local_window=LOCAL_WINDOW, fix_points=False, verbose=False):
-    err = optimize_g2o(self.frames, self.points, local_window, fix_points, verbose)
+    #err = optimize_g2o(self.frames, self.points, local_window, fix_points, verbose)
+    err = 0
+
+    # get target residuals
+    uvs = []
+    for p in self.points:
+      for f, idx in zip(p.frames, p.idxs):
+        uv = f.kps[idx]
+        uvs.append(uv)
+    b = np.array(uvs).flatten()
+
+    # get point location guesses
+    x0 = []
+    for p in self.points:
+      x0.append(p.homogeneous())
+    x0 = np.array(x0).flatten()
+
+    # stack poses
+    """
+    poses = []
+    for i, p in enumerate(self.points):
+      for f, idx in zip(p.frames, p.idxs):
+        poses.append(f.pose[:3])
+    poses = np.concatenate(poses, axis=1)
+    print(poses.shape)
+
+    loss = np.dot(poses, x0)
+    print(loss)
+    """
+
+    # compute residuals
+    def fun(x):
+      ret = []
+      for i, p in enumerate(self.points):
+        for f, idx in zip(p.frames, p.idxs):
+          proj = np.dot(f.pose[:3], x[i*4:(i+1)*4])
+          proj = proj[0:2] / proj[2]
+          ret.append(proj)
+      return np.array(ret).flatten() - b
+
+    print("running least squares with %d params" % len(x0))
+    ret = least_squares(fun, x0, loss='huber')
+    print(ret)
+    exit(0)
 
     # prune points
     culled_pt_count = 0
