@@ -1,6 +1,7 @@
 from helpers import add_ones
 import autograd.numpy as np
 from autograd import grad
+from autograd import elementwise_grad as egrad
 from scipy.optimize import least_squares, leastsq
 
 def optimize(points):
@@ -20,9 +21,12 @@ def optimize(points):
 
   # define function fun(parameter) = measurement
 
+  def fun_loss(comp, meas):
+    #return np.sum(np.abs(comp-meas))
+    return np.sum((comp-meas)**2)
+
   # compute residuals
   def fun(x):
-    print(x[0:10])
     ret = []
     for i, p in enumerate(points):
       for f, idx in zip(p.frames, p.idxs):
@@ -30,11 +34,18 @@ def optimize(points):
         ret.append(proj)
     ret = np.array(ret)
     ret = ret[:, 0:2] / ret[:, 2:]
-    return ret.flatten() - b
+    return fun_loss(ret.flatten(), b)
 
   # stack poses
   grad_fun = grad(fun)
-  print(grad_fun(x0))
+  print("computing at x0")
+
+  # gradient descent
+  for i in range(20):
+    loss = fun(x0)
+    d = grad_fun(x0)
+    print(loss, d)
+    x0 -= d
 
   """
   poses = []
