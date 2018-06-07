@@ -19,14 +19,8 @@ def optimize(points):
       uvs.append(uv)
   b = np.array(uvs).flatten()
 
-  # define function fun(parameter) = measurement
-
-  def fun_loss(comp, meas):
-    #return np.sum(np.abs(comp-meas))
-    return np.sum((comp-meas)**2)
-
   # compute residuals
-  def fun(x):
+  def res(x):
     ret = []
     for i, p in enumerate(points):
       for f, idx in zip(p.frames, p.idxs):
@@ -34,7 +28,27 @@ def optimize(points):
         ret.append(proj)
     ret = np.array(ret)
     ret = ret[:, 0:2] / ret[:, 2:]
-    return fun_loss(ret.flatten(), b)
+    return ret.flatten()
+
+  print(res(x0))
+  print(b)
+  exit(0)
+  
+
+  # define jacobian of function 
+  J = np.zeros((x0.shape[0], b.shape[0]))
+  # TODO: actually do this
+  # http://www.cs.technion.ac.il/users/wwwb/cgi-bin/tr-get.cgi/2014/MSC/MSC-2014-16.pdf page 17
+  # http://www.telesens.co/2016/10/13/bundle-adjustment-part-1-jacobians/ defines 2x3 jacobian
+
+  # define function fun(parameter) = measurement
+
+  def fun(x):
+    def fun_loss(comp, meas):
+      return np.sum((comp-meas)**2)
+    return fun_loss(res(x), b)
+
+
 
   # stack poses
   grad_fun = grad(fun)
