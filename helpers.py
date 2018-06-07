@@ -20,7 +20,7 @@ def triangulate(pose1, pose2, pts1, pts2):
 # turn [[x,y]] -> [[x,y,1]]
 def add_ones(x):
   if len(x.shape) == 1:
-    return np.array(x.tolist()+[1.0])
+    return np.concatenate([x,np.array([1.0])], axis=0)
   else:
     return np.concatenate([x, np.ones((x.shape[0], 1))], axis=1)
 

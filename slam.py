@@ -175,7 +175,8 @@ if __name__ == "__main__":
     exit(-1)
     
   # create displays and open file
-  disp3d = Display3D()
+  if os.getenv("HEADLESS") is None:
+    disp3d = Display3D()
   cap = cv2.VideoCapture(sys.argv[1])
 
   # camera parameters
@@ -197,7 +198,8 @@ if __name__ == "__main__":
   K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
   Kinv = np.linalg.inv(K)
 
-  disp2d = Display2D(W, H)
+  if os.getenv("HEADLESS") is None:
+    disp2d = Display2D(W, H)
 
   """
   mapp.deserialize(open('map.json').read())
