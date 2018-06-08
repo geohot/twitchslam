@@ -103,7 +103,7 @@ class Map(object):
   def optimize(self, local_window=LOCAL_WINDOW, fix_points=False, verbose=False):
     #err = optimize_g2o(self.frames, self.points, local_window, fix_points, verbose)
     err = 0
-    optimize(self.points)
+    optimize(self.points, self.frames)
 
     #ret = least_squares(fun, x0, loss='huber', max_nfev=10)
     #ret = leastsq(fun, x0, maxfev=10)
