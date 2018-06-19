@@ -12,7 +12,7 @@ from frame import Frame, match_frames
 import numpy as np
 import g2o
 from pointmap import Map, Point
-from helpers import triangulate, add_ones
+from helpers import triangulate, add_ones, myjet
 
 np.set_printoptions(suppress=True)
 
@@ -153,13 +153,13 @@ def process_frame(img, pose=None):
         # draw the trail
         pts = []
         lfid = None
-        for f, idx in zip(f1.pts[i1].frames[-5:][::-1], f1.pts[i1].idxs[-5:][::-1]):
+        for f, idx in zip(f1.pts[i1].frames[-9:][::-1], f1.pts[i1].idxs[-9:][::-1]):
           if lfid is not None and lfid-1 != f.id:
             break
           pts.append(tuple(map(lambda x: int(round(x)), f.kpus[idx])))
           lfid = f.id
         if len(pts) >= 2:
-          cv2.polylines(img, np.array([pts], dtype=np.int32), False, (255,0,0), thickness=1, lineType=16)
+          cv2.polylines(img, np.array([pts], dtype=np.int32), False, myjet[len(pts)]*255, thickness=1, lineType=16)
       else:
         cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
     disp2d.paint(img)
