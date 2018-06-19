@@ -133,8 +133,8 @@ def process_frame(img, pose=None):
     # add the point
     color = img[int(round(f1.kpus[idx1[i],1])), int(round(f1.kpus[idx1[i],0]))]
     pt = Point(mapp, p[0:3], color)
-    pt.add_observation(f1, idx1[i])
     pt.add_observation(f2, idx2[i])
+    pt.add_observation(f1, idx1[i])
     new_pts_count += 1
 
   print("Adding:   %d new points, %d search by projection" % (new_pts_count, sbp_pts_count))
@@ -143,17 +143,24 @@ def process_frame(img, pose=None):
   # 2-D display
   if disp2d is not None:
     # paint annotations on the image
-    for i1, i2 in zip(idx1, idx2):
+    for i1 in idx1:
       u1, v1 = int(round(f1.kpus[i1][0])), int(round(f1.kpus[i1][1]))
-      u2, v2 = int(round(f2.kpus[i2][0])), int(round(f2.kpus[i2][1]))
       if f1.pts[i1] is not None:
         if len(f1.pts[i1].frames) >= 5:
           cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
         else:
           cv2.circle(img, (u1, v1), color=(0,128,0), radius=3)
+        # draw the trail
+        pts = []
+        for f, idx in zip(f1.pts[i1].frames[-5:], f1.pts[i1].idxs[-5:]):
+          pts.append((f.id, tuple(map(lambda x: int(round(x)), f.kpus[idx]))))
+        pts = pts[::-1]
+        for p1, p2 in zip(pts[1:], pts[0:-1]):
+          if p1[0]+1 != p2[0]:
+            break
+          cv2.line(img, p1[1], p2[1], color=(255,0,0))
       else:
         cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
-      cv2.line(img, (u1, v1), (u2, v2), color=(255,0,0))
     disp2d.paint(img)
 
   # optimize the map
