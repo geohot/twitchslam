@@ -159,7 +159,7 @@ def process_frame(img, pose=None):
           pts.append(tuple(map(lambda x: int(round(x)), f.kpus[idx])))
           lfid = f.id
         if len(pts) >= 2:
-          cv2.polylines(img, np.array([pts], dtype=np.int32), False, (255,0,0))
+          cv2.polylines(img, np.array([pts], dtype=np.int32), False, (255,0,0), thickness=1, lineType=16)
       else:
         cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
     disp2d.paint(img)
