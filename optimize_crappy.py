@@ -33,7 +33,7 @@ for i in range(20):
   assert(np.allclose(w, what))
 """
 
-def optimize(points, frames):
+def optimize(frames, points, *args):
   # get point location guesses + camera poses (initial parameter vector)
   x0 = []
   for p in points:
