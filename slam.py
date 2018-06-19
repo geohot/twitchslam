@@ -152,13 +152,14 @@ def process_frame(img, pose=None):
           cv2.circle(img, (u1, v1), color=(0,128,0), radius=3)
         # draw the trail
         pts = []
-        for f, idx in zip(f1.pts[i1].frames[-5:], f1.pts[i1].idxs[-5:]):
-          pts.append((f.id, tuple(map(lambda x: int(round(x)), f.kpus[idx]))))
-        pts = pts[::-1]
-        for p1, p2 in zip(pts[1:], pts[0:-1]):
-          if p1[0]+1 != p2[0]:
+        lfid = None
+        for f, idx in zip(f1.pts[i1].frames[-5:][::-1], f1.pts[i1].idxs[-5:][::-1]):
+          if lfid is not None and lfid-1 != f.id:
             break
-          cv2.line(img, p1[1], p2[1], color=(255,0,0))
+          pts.append(tuple(map(lambda x: int(round(x)), f.kpus[idx])))
+          lfid = f.id
+        if len(pts) >= 2:
+          cv2.polylines(img, np.array([pts], dtype=np.int32), False, (255,0,0))
       else:
         cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
     disp2d.paint(img)
