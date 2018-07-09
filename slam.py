@@ -12,15 +12,14 @@ from frame import Frame, match_frames
 import numpy as np
 import g2o
 from pointmap import Map, Point
-from helpers import triangulate, add_ones, myjet
+from helpers import triangulate, add_ones
 
 np.set_printoptions(suppress=True)
 
 class SLAM(object):
-  def __init__(self, W, H, K, disp2d=None):
+  def __init__(self, W, H, K):
     # main classes
     self.mapp = Map()
-    self.disp2d = disp2d
 
     # params
     self.W, self.H = W, H
@@ -28,8 +27,9 @@ class SLAM(object):
 
   def process_frame(self, img, pose=None):
     start_time = time.time()
-    img = cv2.resize(img, (self.W, self.H))
+    assert img.shape[0:2] == (self.H, self.W)
     frame = Frame(self.mapp, img, self.K)
+
     if frame.id == 0:
       return
 
@@ -153,30 +153,6 @@ class SLAM(object):
     print("Time:     %.2f ms" % ((time.time()-start_time)*1000.0))
     print(np.linalg.inv(f1.pose))
 
-    # 2-D display
-    if self.disp2d is not None:
-      # paint annotations on the image
-      for i1 in idx1:
-        u1, v1 = int(round(f1.kpus[i1][0])), int(round(f1.kpus[i1][1]))
-        if f1.pts[i1] is not None:
-          if len(f1.pts[i1].frames) >= 5:
-            cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
-          else:
-            cv2.circle(img, (u1, v1), color=(0,128,0), radius=3)
-          # draw the trail
-          pts = []
-          lfid = None
-          for f, idx in zip(f1.pts[i1].frames[-9:][::-1], f1.pts[i1].idxs[-9:][::-1]):
-            if lfid is not None and lfid-1 != f.id:
-              break
-            pts.append(tuple(map(lambda x: int(round(x)), f.kpus[idx])))
-            lfid = f.id
-          if len(pts) >= 2:
-            cv2.polylines(img, np.array([pts], dtype=np.int32), False, myjet[len(pts)]*255, thickness=1, lineType=16)
-        else:
-          cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
-      self.disp2d.paint(img)
-
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
@@ -214,7 +190,8 @@ if __name__ == "__main__":
   if os.getenv("HEADLESS") is None:
     disp2d = Display2D(W, H)
 
-  slam = SLAM(W, H, K, disp2d)
+  slam = SLAM(W, H, K)
+
 
   """
   mapp.deserialize(open('map.json').read())
@@ -232,6 +209,8 @@ if __name__ == "__main__":
   i = 0
   while cap.isOpened():
     ret, frame = cap.read()
+    frame = cv2.resize(frame, (W, H))
+
     print("\n*** frame %d/%d ***" % (i, CNT))
     if ret == True:
       slam.process_frame(frame, None if gt_pose is None else np.linalg.inv(gt_pose[i]))
@@ -241,6 +220,10 @@ if __name__ == "__main__":
     # 3-D display
     if disp3d is not None:
       disp3d.paint(slam.mapp)
+
+    if disp2d is not None:
+      img = slam.mapp.frames[-1].annotate(frame)
+      disp2d.paint(img)
 
     i += 1
     """

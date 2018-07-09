@@ -5,7 +5,7 @@ from scipy.spatial import cKDTree
 np.set_printoptions(suppress=True)
 
 from skimage.measure import ransac
-from helpers import add_ones, poseRt, fundamentalToRt, normalize, EssentialMatrixTransform
+from helpers import add_ones, poseRt, fundamentalToRt, normalize, EssentialMatrixTransform, myjet
 
 def extractFeatures(img):
   orb = cv2.ORB_create()
@@ -77,6 +77,30 @@ class Frame(object):
       self.kpus, self.des, self.pts = None, None, None
 
     self.id = tid if tid is not None else mapp.add_frame(self)
+
+  def annotate(self, img):
+    # paint annotations on the image
+    for i1 in range(len(self.kpus)):
+      u1, v1 = int(round(self.kpus[i1][0])), int(round(self.kpus[i1][1]))
+      if self.pts[i1] is not None:
+        if len(self.pts[i1].frames) >= 5:
+          cv2.circle(img, (u1, v1), color=(0,255,0), radius=3)
+        else:
+          cv2.circle(img, (u1, v1), color=(0,128,0), radius=3)
+        # draw the trail
+        pts = []
+        lfid = None
+        for f, idx in zip(self.pts[i1].frames[-9:][::-1], self.pts[i1].idxs[-9:][::-1]):
+          if lfid is not None and lfid-1 != f.id:
+            break
+          pts.append(tuple(map(lambda x: int(round(x)), f.kpus[idx])))
+          lfid = f.id
+        if len(pts) >= 2:
+          cv2.polylines(img, np.array([pts], dtype=np.int32), False, myjet[len(pts)]*255, thickness=1, lineType=16)
+      else:
+        cv2.circle(img, (u1, v1), color=(0,0,0), radius=3)
+    return img
+
 
   # inverse of intrinsics matrix
   @property
