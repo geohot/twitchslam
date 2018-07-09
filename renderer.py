@@ -57,22 +57,16 @@ class Renderer(object):
 if __name__ == "__main__":
   W,H = 640,480
 
-  """
   r = Renderer(W, H)
   draw = r.draw()
   print(draw.shape)
-  """
 
   draw = np.zeros((480, 640, 3))
 
-  import pygame
-  from pygame.locals import *
-  pygame.init()
-  pygame.display.set_mode((W, H), DOUBLEBUF)
-  pygame.display.flip()
-
-  #from display import Display2D
-  #disp2d = Display2D(W, H)
-  #disp2d.paint(draw)
+  from display import Display2D
+  disp2d = Display2D(W, H)
+  while 1:
+    disp2d.paint(draw)
+    time.sleep(1)
 
 
