@@ -158,11 +158,11 @@ if __name__ == "__main__":
   if len(sys.argv) < 2:
     print("%s <video.mp4>" % sys.argv[0])
     exit(-1)
+
+  disp2d, disp3d = None, None
     
   if os.getenv("HEADLESS") is None:
     disp3d = Display3D()
-  else:
-    disp3d = None
 
   cap = cv2.VideoCapture(sys.argv[1])
 
@@ -191,7 +191,6 @@ if __name__ == "__main__":
     disp2d = Display2D(W, H)
 
   slam = SLAM(W, H, K)
-
 
   """
   mapp.deserialize(open('map.json').read())
