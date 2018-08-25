@@ -44,7 +44,7 @@ class Renderer(object):
   def fakedraw(self):
     pass
 
-  def draw(self):
+  def draw(self, pos):
     # set up 2d screen
     glClearColor(0.5, 0.5, 0.5, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -54,8 +54,8 @@ class Renderer(object):
     glPushMatrix()
     glLoadIdentity()
     gluPerspective(45, self.W/self.H, 0.1, 50.0)
-    glTranslatef(0,0,-10)
-    glRotatef(1, 3, 1, 1)
+    glTranslatef(pos[0], pos[1], pos[2])
+    #glRotatef(ang, 3, 1, 1)
 
     # draw stuff
     glBegin(GL_LINES)
@@ -71,7 +71,7 @@ class Renderer(object):
     glutSwapBuffers()
 
     glPopMatrix()
-    return ret[:, :, 0:3]
+    return np.copy(ret[:, :, 0:3])
 
 if __name__ == "__main__":
   W,H = 640,480
@@ -80,8 +80,10 @@ if __name__ == "__main__":
 
   from display import Display2D
   disp2d = Display2D(W, H)
+  i = 0
   while 1:
-    draw = r.draw()
+    draw = r.draw([i,0,-10])
     disp2d.paint(draw)
-    time.sleep(0.5)
+    time.sleep(0.05)
+    i += 0.02
 
