@@ -68,7 +68,7 @@ class SLAM(object):
     if len(self.mapp.points) > 0:
       # project *all* the map points into the current frame
       map_points = np.array([p.homogeneous() for p in self.mapp.points])
-      projs = np.dot(np.dot(K, f1.pose[:3]), map_points.T).T
+      projs = np.dot(np.dot(self.K, f1.pose[:3]), map_points.T).T
       projs = projs[:, 0:2] / projs[:, 2:]
 
       # only the points that fit in the frame
@@ -124,8 +124,8 @@ class SLAM(object):
         continue
 
       # reproject
-      pp1 = np.dot(K, pl1[:3])
-      pp2 = np.dot(K, pl2[:3])
+      pp1 = np.dot(self.K, pl1[:3])
+      pp2 = np.dot(self.K, pl2[:3])
 
       # check reprojection error
       pp1 = (pp1[0:2] / pp1[2]) - f1.kpus[idx1[i]]

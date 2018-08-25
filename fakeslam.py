@@ -21,14 +21,17 @@ if __name__ == "__main__":
   slam = SLAM(W, H, K)
   r = Renderer(W, H)
 
-  disp3d = Display3D()
+  #disp3d = Display3D()
   disp2d = Display2D(W, H)
 
   pos_x = 0
   while 1:
-    frame = r.draw([pos_x,0,-10])
+    frame = r.draw([pos_x,0,-20])
+    #disp2d.paint(frame)
+
     slam.process_frame(frame, None)
-    disp3d.paint(slam.mapp)
+    #disp3d.paint(slam.mapp)
+
     img = slam.mapp.frames[-1].annotate(frame)
     disp2d.paint(img)
 

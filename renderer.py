@@ -48,7 +48,6 @@ class Renderer(object):
     # set up 2d screen
     glClearColor(0.5, 0.5, 0.5, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glColor(0.0, 1.0, 0.0)
 
     # set up camera
     glPushMatrix()
@@ -58,10 +57,21 @@ class Renderer(object):
     #glRotatef(ang, 3, 1, 1)
 
     # draw stuff
+    glColor(0.0, 1.0, 0.0)
     glBegin(GL_LINES)
     for edge in self.edges:
       for vertex in edge:
         glVertex3fv(self.vertices[vertex])
+    glEnd()
+
+    # draw 2nd cube
+    glColor(1.0, 0.0, 0.0)
+    glBegin(GL_LINES)
+    for edge in self.edges:
+      for vertex in edge:
+        vv = self.vertices[vertex]
+        vv = (vv[0]+5, vv[1]+2, vv[2])
+        glVertex3fv(vv)
     glEnd()
 
     # render to numpy buffer and return
