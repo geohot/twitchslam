@@ -35,37 +35,53 @@ class Renderer(object):
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
     glutInitWindowSize(self.W, self.H)
     glutCreateWindow(b"OpenGL Offscreen")
-#    glutHideWindow()
-    glutDisplayFunc(self.draw)
-    glutMainLoop()
+    glutHideWindow()
+
+    # not used
+    glutDisplayFunc(self.fakedraw)
+    #glutMainLoop()
+
+  def fakedraw(self):
+    pass
 
   def draw(self):
-    glClearColor(1., 0.5, 0.5, 1.0)
+    # set up 2d screen
+    glClearColor(0.5, 0.5, 0.5, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glColor(0.0, 1.0, 0.0)
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0)
-    glViewport(0, 0, self.W, self.H)
 
+    # set up camera
+    glPushMatrix()
+    glLoadIdentity()
+    gluPerspective(45, self.W/self.H, 0.1, 50.0)
+    glTranslatef(0,0,-10)
+    glRotatef(1, 3, 1, 1)
+
+    # draw stuff
     glBegin(GL_LINES)
     for edge in self.edges:
       for vertex in edge:
         glVertex3fv(self.vertices[vertex])
     glEnd()
 
+    # render to numpy buffer and return
     glPixelStorei(GL_PACK_ALIGNMENT, 1)
     ret = glReadPixels(0, 0, self.W, self.H, GL_RGBA, GL_UNSIGNED_BYTE)
-    ret = np.fromstring(ret, np.uint8).reshape((self.W, self.H, 4))
+    ret = np.fromstring(ret, np.uint8).reshape((self.H, self.W, 4))
     glutSwapBuffers()
+
+    glPopMatrix()
     return ret[:, :, 0:3]
 
 if __name__ == "__main__":
   W,H = 640,480
 
   r = Renderer(W, H)
-  draw = r.draw()
-  print(draw.shape)
-
-  draw = np.zeros((480, 640, 3))
 
   from display import Display2D
   disp2d = Display2D(W, H)
+  while 1:
+    draw = r.draw()
+    disp2d.paint(draw)
+    time.sleep(0.5)
+
