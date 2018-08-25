@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import time
 
 sys.path.append("lib/macosx")
 sys.path.append("lib/linux")
@@ -24,6 +25,7 @@ if __name__ == "__main__":
   slam = SLAM(W, H, K)
   r = Renderer(W, H)
 
+  fn = 0
   pos_x = 0
   dir_x = True
   while 1:
@@ -41,6 +43,11 @@ if __name__ == "__main__":
       dir_x = False
     elif pos_x < -10:
       dir_x = True
-    pos_x += 0.2 if dir_x else -0.2
+    pos_x += 0.1 * 1 if dir_x else -1
 
+    fn += 1
+    if fn == 5:
+      slam.mapp.optimize(verbose=True, rounds=10)
+      time.sleep(10)
+      break
 

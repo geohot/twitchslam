@@ -101,8 +101,8 @@ class Map(object):
 
   # *** optimizer ***
   
-  def optimize(self, local_window=LOCAL_WINDOW, fix_points=False, verbose=False):
-    err = optimize(self.frames, self.points, local_window, fix_points, verbose)
+  def optimize(self, local_window=LOCAL_WINDOW, fix_points=False, verbose=False, rounds=50):
+    err = optimize(self.frames, self.points, local_window, fix_points, verbose, rounds)
 
     # prune points
     culled_pt_count = 0
