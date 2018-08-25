@@ -25,10 +25,10 @@ class SLAM(object):
     self.W, self.H = W, H
     self.K = K
 
-  def process_frame(self, img, pose=None):
+  def process_frame(self, img, pose=None, verts=None):
     start_time = time.time()
     assert img.shape[0:2] == (self.H, self.W)
-    frame = Frame(self.mapp, img, self.K)
+    frame = Frame(self.mapp, img, self.K, verts=verts)
 
     if frame.id == 0:
       return

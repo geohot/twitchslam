@@ -28,13 +28,16 @@ if __name__ == "__main__":
   pos_x = 0
   dir_x = True
   while 1:
-    frame = r.draw([pos_x,0,0])
+    frame, verts = r.draw([pos_x,0,0])
+
+    # add gaussian noise
+    verts += np.random.normal(0.0, 0.2, verts.shape)
 
     # ground truth pose
     pose = np.eye(4)
     pose[0,3] = pos_x
 
-    slam.process_frame(frame, None)
+    slam.process_frame(frame, None, verts)
     disp3d.paint(slam.mapp)
 
     img = slam.mapp.frames[-1].annotate(frame)

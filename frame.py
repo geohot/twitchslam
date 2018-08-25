@@ -63,13 +63,16 @@ def match_frames(f1, f2):
   return idx1[inliers], idx2[inliers], fundamentalToRt(model.params)
 
 class Frame(object):
-  def __init__(self, mapp, img, K, pose=np.eye(4), tid=None):
+  def __init__(self, mapp, img, K, pose=np.eye(4), tid=None, verts=None):
     self.K = np.array(K)
     self.pose = np.array(pose)
 
     if img is not None:
       self.h, self.w = img.shape[0:2]
-      self.kpus, self.des = extractFeatures(img)
+      if verts is None:
+        self.kpus, self.des = extractFeatures(img)
+      else:
+        self.kpus, self.des = verts, np.array(list(range(len(verts)))*32, np.uint8).reshape(32, len(verts)).T
       self.pts = [None]*len(self.kpus)
     else:
       # fill in later
