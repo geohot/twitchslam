@@ -59,7 +59,9 @@ Rendered Scene Test
 ./fakeslam.py
 ```
 
-NOTE: The test currently doesn't work well. TODO: Investigate why?
+NOTE: The test currently doesn't work well.
+
+TODO: Investigate why? Use the OpenGL projection matrix to get the real vertex coords and fake the matcher.
 
 DONE
 -----
