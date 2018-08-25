@@ -57,7 +57,7 @@ def match_frames(f1, f2):
   model, inliers = ransac((ret[:, 0], ret[:, 1]),
                           EssentialMatrixTransform,
                           min_samples=8,
-                          residual_threshold=0.002,
+                          residual_threshold=0.02,
                           max_trials=100)
   print("Matches:  %d -> %d -> %d -> %d" % (len(f1.des), len(matches), len(inliers), sum(inliers)))
   return idx1[inliers], idx2[inliers], fundamentalToRt(model.params)

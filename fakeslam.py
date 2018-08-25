@@ -31,7 +31,7 @@ if __name__ == "__main__":
     frame, verts = r.draw([pos_x,0,0])
 
     # add gaussian noise
-    verts += np.random.normal(0.0, 0.2, verts.shape)
+    verts += np.random.normal(0.0, 1.0, verts.shape)
 
     # ground truth pose
     pose = np.eye(4)
