@@ -52,6 +52,15 @@ Libraries Used
 * pangolin for 3-D display
 * g2opy for optimization (soon!)
 
+Rendered Scene Test
+-----
+
+```
+./fakeslam.py
+```
+
+NOTE: The test currently doesn't work well. TODO: Investigate why?
+
 DONE
 -----
 

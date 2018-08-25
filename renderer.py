@@ -52,7 +52,7 @@ class Renderer(object):
     # set up camera
     glPushMatrix()
     glLoadIdentity()
-    gluPerspective(45, self.W/self.H, 0.1, 50.0)
+    gluPerspective(45, self.W/self.H, 0.1, 100.0)
     glTranslatef(pos[0], pos[1], pos[2])
 
     # draw stuff
@@ -67,22 +67,22 @@ class Renderer(object):
       glEnd()
 
     glColor(0.0, 1.0, 0.0)
-    draw_cube([0,0,0])
+    draw_cube([0,0,-50])
 
     glColor(1.0, 0.0, 0.0)
-    draw_cube([5,2,0])
+    draw_cube([5,2,-30])
 
     glColor(0.0, 0.0, 1.0)
-    draw_cube([-10,2,0])
+    draw_cube([-10,2,-30])
 
     glColor(0.0, 1.0, 1.0)
-    draw_cube([5,5,5])
+    draw_cube([5,5,-25])
 
     glColor(1.0, 1.0, 0.0)
-    draw_cube([-5,-5,-5])
+    draw_cube([-5,-5,-35])
 
     glColor(1.0, 1.0, 1.0)
-    draw_cube([-5,5,-5])
+    draw_cube([-5,5,-45])
 
     # render to numpy buffer and return
     glPixelStorei(GL_PACK_ALIGNMENT, 1)
