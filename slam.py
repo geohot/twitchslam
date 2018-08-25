@@ -136,7 +136,10 @@ class SLAM(object):
         continue
 
       # add the point
-      color = img[int(round(f1.kpus[idx1[i],1])), int(round(f1.kpus[idx1[i],0]))]
+      try:
+        color = img[int(round(f1.kpus[idx1[i],1])), int(round(f1.kpus[idx1[i],0]))]
+      except IndexError:
+        color = (255,0,0)
       pt = Point(self.mapp, p[0:3], color)
       pt.add_observation(f2, idx2[i])
       pt.add_observation(f1, idx1[i])

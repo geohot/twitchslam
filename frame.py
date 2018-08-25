@@ -72,6 +72,7 @@ class Frame(object):
       if verts is None:
         self.kpus, self.des = extractFeatures(img)
       else:
+        assert len(verts) < 256
         self.kpus, self.des = verts, np.array(list(range(len(verts)))*32, np.uint8).reshape(32, len(verts)).T
       self.pts = [None]*len(self.kpus)
     else:
