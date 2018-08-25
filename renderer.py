@@ -46,7 +46,7 @@ class Renderer(object):
 
   def draw(self, pos):
     # set up 2d screen
-    glClearColor(0.5, 0.5, 0.5, 1.0)
+    glClearColor(0.1, 0.1, 0.1, 1.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     # set up camera
@@ -54,25 +54,35 @@ class Renderer(object):
     glLoadIdentity()
     gluPerspective(45, self.W/self.H, 0.1, 50.0)
     glTranslatef(pos[0], pos[1], pos[2])
-    #glRotatef(ang, 3, 1, 1)
 
     # draw stuff
-    glColor(0.0, 1.0, 0.0)
-    glBegin(GL_LINES)
-    for edge in self.edges:
-      for vertex in edge:
-        glVertex3fv(self.vertices[vertex])
-    glEnd()
 
-    # draw 2nd cube
+    def draw_cube(offset):
+      glBegin(GL_LINES)
+      for edge in self.edges:
+        for vertex in edge:
+          vv = self.vertices[vertex]
+          vv = (vv[0]+offset[0], vv[1]+offset[1], vv[2]+offset[2])
+          glVertex3fv(vv)
+      glEnd()
+
+    glColor(0.0, 1.0, 0.0)
+    draw_cube([0,0,0])
+
     glColor(1.0, 0.0, 0.0)
-    glBegin(GL_LINES)
-    for edge in self.edges:
-      for vertex in edge:
-        vv = self.vertices[vertex]
-        vv = (vv[0]+5, vv[1]+2, vv[2])
-        glVertex3fv(vv)
-    glEnd()
+    draw_cube([5,2,0])
+
+    glColor(0.0, 0.0, 1.0)
+    draw_cube([-10,2,0])
+
+    glColor(0.0, 1.0, 1.0)
+    draw_cube([5,5,5])
+
+    glColor(1.0, 1.0, 0.0)
+    draw_cube([-5,-5,-5])
+
+    glColor(1.0, 1.0, 1.0)
+    draw_cube([-5,5,-5])
 
     # render to numpy buffer and return
     glPixelStorei(GL_PACK_ALIGNMENT, 1)

@@ -18,22 +18,29 @@ if __name__ == "__main__":
   K = np.array([[F,0,W//2],[0,F,H//2],[0,0,1]])
   Kinv = np.linalg.inv(K)
 
+  disp3d = Display3D()
+  disp2d = Display2D(W, H)
+
   slam = SLAM(W, H, K)
   r = Renderer(W, H)
 
-  #disp3d = Display3D()
-  disp2d = Display2D(W, H)
-
   pos_x = 0
+  dir_x = True
   while 1:
-    frame = r.draw([pos_x,0,-20])
+    frame = r.draw([pos_x,0,-30])
     #disp2d.paint(frame)
 
     slam.process_frame(frame, None)
-    #disp3d.paint(slam.mapp)
+    disp3d.paint(slam.mapp)
 
     img = slam.mapp.frames[-1].annotate(frame)
     disp2d.paint(img)
 
-    pos_x += 0.01
+    # flip flop
+    if pos_x > 10:
+      dir_x = False
+    elif pos_x < -10:
+      dir_x = True
+    pos_x += 0.2 if dir_x else -0.2
+
 
