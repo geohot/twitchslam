@@ -1,4 +1,5 @@
 from helpers import poseRt, hamming_distance, add_ones
+from constants import CULLING_ERR_THRES
 from frame import Frame
 import time
 import numpy as np
@@ -119,7 +120,7 @@ class Map(object):
         errs.append(np.linalg.norm(proj-uv))
 
       # cull
-      if old_point or np.mean(errs) > 0.002:
+      if old_point or np.mean(errs) > CULLING_ERR_THRES:
         culled_pt_count += 1
         self.points.remove(p)
         p.delete()

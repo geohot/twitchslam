@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 from scipy.spatial import cKDTree
+from constants import RANSAC_RESIDUAL_THRES, RANSAC_MAX_TRIALS
 np.set_printoptions(suppress=True)
 
 from skimage.measure import ransac
@@ -57,8 +58,8 @@ def match_frames(f1, f2):
   model, inliers = ransac((ret[:, 0], ret[:, 1]),
                           EssentialMatrixTransform,
                           min_samples=8,
-                          residual_threshold=0.02,
-                          max_trials=100)
+                          residual_threshold=RANSAC_RESIDUAL_THRES,
+                          max_trials=RANSAC_MAX_TRIALS)
   print("Matches:  %d -> %d -> %d -> %d" % (len(f1.des), len(matches), len(inliers), sum(inliers)))
   return idx1[inliers], idx2[inliers], fundamentalToRt(model.params)
 
