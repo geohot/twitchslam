@@ -28,10 +28,13 @@ if __name__ == "__main__":
   pos_x = 0
   dir_x = True
   while 1:
+    fn += 1
+
+    # render
     frame, verts = r.draw([pos_x,0,0])
 
     # add gaussian noise
-    verts += np.random.normal(0.0, 1.0, verts.shape)
+    verts += np.random.normal(0.0, 0.1, verts.shape)
 
     # ground truth pose
     pose = np.eye(4)
@@ -50,13 +53,6 @@ if __name__ == "__main__":
       dir_x = True
     pos_x += 0.5 * (1 if dir_x else -1)
 
-    """
-    fn += 1
-    if fn == 5:
-      slam.mapp.optimize(verbose=True, rounds=10)
-      #print(slam.mapp.serialize())
-      while 1:
-        break
-        time.sleep(1)
-    """
+    if fn > 20:
+      slam.mapp.optimize(verbose=True, local_window=None, rounds=10)
 

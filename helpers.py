@@ -55,6 +55,8 @@ def fundamentalToRt(F):
   if np.sum(R.diagonal()) < 0:
     R = np.dot(np.dot(U, W.T), Vt)
   t = U[:, 2]
+
+  # TODO: Resolve ambiguities in better ways. This is wrong.
   if t[2] < 0:
     t *= -1
   
