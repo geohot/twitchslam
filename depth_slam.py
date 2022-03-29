@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# SEEK=100 FSKIP=5 F=1000 python slam.py /mnt/HDD/home/aditya/elab_visualiser/elab/1644664247513/1644664247513.mp4
+# 1644664247513
 
 import os
 import sys
@@ -160,6 +160,72 @@ class SLAM(object):
     print(np.linalg.inv(f1.pose))
 
 
+import os
+#import cv2
+import numpy as np
+from skimage.metrics import structural_similarity as compare_ssim
+import matplotlib.pyplot as plt
+
+import pandas as pd
+import signal
+from multiprocessing import Process, Array, Pool, Queue
+import ctypes
+import glob
+import time
+import cv2
+
+#manydepth_path = "dataset/manydepth/000008"
+dataset_dir = "/mnt/HDD/home/aditya/elab_visualiser/elab"
+
+#data = sorted(glob.glob(dataset_dir + "/*"))
+data = sorted(glob.glob(dataset_dir + "/1644664247513"))
+
+def image_loop():
+
+  #FRAME_SKIP = int(os.getenv("FSKIP"))
+  for folder_path in data[-1:]:
+    id = folder_path.split("/")[-1]
+    start_time = int(id)
+    CSV_path = os.path.join(folder_path, id + ".csv")
+
+    csv_dat = pd.read_csv(CSV_path)
+    frames_folder_path = os.path.join(folder_path, "frames")
+    depth_folder_path = os.path.join(folder_path, 'depth_midas')
+    #frames_folder_path = os.path.join(folder_path, "inputs_midas")
+    #depth_folder_path = os.path.join(folder_path, 'outputs_midas')
+
+    frames_list = sorted(glob.glob(frames_folder_path + "/*"))
+    
+    #for frame_path in frames_list[::FRAME_SKIP]:
+    for frame_path in frames_list:
+      frame_name = frame_path.split("/")[-1]
+      depth_file_path = os.path.join(depth_folder_path, frame_name)
+
+      Timestamp_frame = float(".".join(frame_path.split("/")[-1].split(".")[:-1]))
+      print(depth_file_path)
+      #frame = PIL.Image.open(frame_path)
+      #depth = PIL.Image.open(depth_file_path)
+      frame = cv2.imread(frame_path)
+      depth = cv2.imread(depth_file_path)
+      depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
+      #height, width = depth.shape
+      #scale_factor = 0.5
+      #frame = cv2.resize(frame, (int(width*scale_factor), int(height*scale_factor)))
+      #depth = cv2.resize(depth, (int(width*scale_factor), int(height*scale_factor)))
+      
+      
+
+      print(Timestamp_frame)
+      
+      sensors_data = csv_dat[csv_dat['Timestamp'] == Timestamp_frame]
+      if len(sensors_data):
+        #Timestamp, Longitude, Latitude, RotationVX, RotationVY,RotationVZ,RotationVW,RotationVAcc,linear_acc_x,linear_acc_y,linear_acc_z,heading,speed = sensors_data.values[0]
+        sen_data = sensors_data.values[0]
+
+      
+      #yield frame, depth, list(sen_data)
+      yield frame, depth, []
+
 if __name__ == "__main__":
   if len(sys.argv) < 2:
     print("%s <video.mp4>" % sys.argv[0])
@@ -212,16 +278,34 @@ if __name__ == "__main__":
     gt_pose[:, :3, 3] *= 50
 
   i = 0
-  while cap.isOpened():
-    ret, frame_old = cap.read()
+  #while cap.isOpened():
+  while True:
+    
+    """
+    frame_old, depth_old, sen_data_old = image_loop()
+    frame, depth, sen_data = frame_old, depth_old, sen_data_old
 
     FRAME_SKIP = int(os.getenv("FSKIP"))
     i=0
-    while ret and i<FRAME_SKIP:
-      frame = frame_old
-      ret, frame_old = cap.read()
+    while i<FRAME_SKIP:
+      frame, depth, sen_data = frame_old, depth_old, sen_data_old
+      frame_old, depth_old, sen_data_old = image_loop()
+      i+=1
+    """
+
+    t_old = image_loop()
+    t = t_old
+
+    FRAME_SKIP = int(os.getenv("FSKIP"))
+    i=0
+    while i<FRAME_SKIP:
+      t = t_old
+      t_old = image_loop()
       i+=1
 
+    t = list(t)
+    print(t)
+    frame = t[0]
     frame = cv2.resize(frame, (W, H))
 
     print("\n*** frame %d/%d ***" % (i, CNT))
