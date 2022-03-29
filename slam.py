@@ -5,8 +5,10 @@
 import os
 import sys
 
-sys.path.append("lib/macosx")
-sys.path.append("lib/linux")
+#sys.path.append("lib/macosx")
+#sys.path.append("lib/linux")
+
+#Path(os.getcwd()).parent.absolute()
 
 import time
 import cv2

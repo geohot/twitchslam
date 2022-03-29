@@ -9,6 +9,7 @@ RUN apt-get install -y libeigen3-dev
 RUN apt-get install -y git 
 RUN /usr/bin/python3 -m pip install opencv-python
 RUN /usr/bin/python3 -m pip install pygame
+RUN /usr/bin/python3 -m pip install PyOpenGL
 
 # Install CMake
 #RUN apt install -y libprotobuf-dev protobuf-compiler
@@ -18,6 +19,9 @@ RUN apt-get install -y freeglut3
 RUN apt-get install -y freeglut3-dev
 RUN apt-get install -y libglew-dev
 RUN apt-get install -y binutils-gold
+RUN apt-get install -y libsuitesparse-dev
+RUN /usr/bin/python3 -m pip install scipy
+RUN /usr/bin/python3 -m pip install scikit-image
 
 # Install Eigen
 WORKDIR /app
@@ -27,6 +31,7 @@ RUN git checkout 3.3.4
 RUN mkdir build
 WORKDIR /app/eigen/build
 RUN /usr/bin/cmake ..
+RUN /usr/bin/make -j12
 RUN make install
 
 # Install pangolin
@@ -37,15 +42,27 @@ WORKDIR /app/pangolin
 RUN mkdir build
 WORKDIR /app/pangolin/build
 RUN /usr/bin/cmake ..
-#RUN /usr/bin/make -j8
-RUN /usr/bin/make 
+RUN /usr/bin/make -j12
+#RUN /usr/bin/make 
 WORKDIR /app/pangolin/
-RUN ls pangolin*.so
-RUN rm pangolin.cpython-38-x86_64-linux-gnu.so
+RUN ls  pangolin*.so
+RUN /usr/bin/python3 setup.py install
+
+# Install g2opy
+WORKDIR /app
+RUN git clone https://github.com/uoip/g2opy.git
+WORKDIR /app/g2opy
+RUN mkdir build
+WORKDIR /app/g2opy/build
+RUN /usr/bin/cmake ..
+RUN /usr/bin/make -j12
+RUN /usr/bin/make install
+WORKDIR /app/g2opy/
 RUN /usr/bin/python3 setup.py install
 
 # Install twitchslam
 WORKDIR /app
-RUN git clone https://github.com/geohot/twitchslam
+#RUN git clone https://github.com/geohot/twitchslam
+RUN git clone https://github.com/AdityaNG/twitchslam
 WORKDIR /app/twitchslam
 CMD /usr/bin/python3 slam.py
