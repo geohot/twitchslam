@@ -1,5 +1,6 @@
 #FROM python
-FROM ubuntu:20.04
+#FROM ubuntu:20.04
+FROM nvidia/vulkan:1.1.121
 RUN mkdir /app
 WORKDIR /app
 ARG DEBIAN_FRONTEND=noninteractive
@@ -7,9 +8,11 @@ RUN apt-get update && apt-get install -y python3-pip
 RUN apt-get install ffmpeg libsm6 libxext6 -y
 RUN apt-get install -y libeigen3-dev
 RUN apt-get install -y git 
+RUN /usr/bin/python3 -m pip install --upgrade pip
 RUN /usr/bin/python3 -m pip install opencv-python
 RUN /usr/bin/python3 -m pip install pygame
 RUN /usr/bin/python3 -m pip install PyOpenGL
+RUN /usr/bin/python3 -m pip install scikit-build
 
 # Install CMake
 #RUN apt install -y libprotobuf-dev protobuf-compiler
@@ -65,4 +68,12 @@ WORKDIR /app
 #RUN git clone https://github.com/geohot/twitchslam
 RUN git clone https://github.com/AdityaNG/twitchslam
 WORKDIR /app/twitchslam
-CMD /usr/bin/python3 slam.py
+RUN git checkout docker
+
+RUN touch /root/.Xauthority
+RUN apt-get -y install xauth
+
+EXPOSE 8887
+WORKDIR /app/twitchslam
+#CMD /usr/bin/python3 slam.py
+CMD sh run.sh
