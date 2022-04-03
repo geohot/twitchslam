@@ -7,43 +7,15 @@ A toy implementation of monocular SLAM written while livestreaming.
 # Docker
 ```bash
 docker build -t twitchslam .
-docker run --runtime=nvidia -it -d --gpus all --net=host \
-	-e DISPLAY -v /tmp/.X11-unix \
-    -e NVIDIA_DRIVER_CAPABILITIES=all \
-    -e SEEK=100 -e FSKIP=5 -e F=1000
-	--env DISPLAY_COOKIE="5ed98dd8a299505cac6bc6004209b381" \
-    twitchslam
+docker run --runtime=nvidia --gpus all  --net=host -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all --env DISPLAY_COOKIE="sped-machine/unix:0  MIT-MAGIC-COOKIE-1  5ed98dd8a299505cac6bc6004209b381" -it twitchslam
+```
 
-docker run --runtime=nvidia -it -d --gpus all --net=host \ 
-	-e DISPLAY -v /tmp/.X11-unix \ 
-        -e NVIDIA_DRIVER_CAPABILITIES=all \
-	--env DISPLAY_COOKIE="(DISPLAY_COOKIE)" \
-        twitchslam \ 
-	/bin/sh /fsds/run.sh
-
-docker run --runtime=nvidia -it --gpus all --net=host \
-	-e DISPLAY -v /tmp/.X11-unix \
-    -e NVIDIA_DRIVER_CAPABILITIES=all \
-    -e SEEK=100 -e FSKIP=5 -e F=1000 \
-	--env DISPLAY_COOKIE="5ed98dd8a299505cac6bc6004209b381" \
-    twitchslam /bin/bash
-
-docker run --runtime=nvidia --gpus all  --net=host -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all --env DISPLAY_COOKIE="sped-machine/unix:0  MIT-MAGIC-COOKIE-1  5ed98dd8a299505cac6bc6004209b381" -it twitchslam /bin/bash
-
+## Install nvidia-docker2
+```bash
 sudo apt install nvidia-docker2
 
 sudo systemctl daemon-reload
 sudo systemctl restart docker
-
-touch .Xauthority
-xauth add $DISPLAY_COOKIE
-
-F=525 python3 slam.py videos/test_freiburgxyz525.mp4
-
-# https://stackoverflow.com/questions/15933493/pygame-error-no-available-video-device
-FSKIP=1 SDL_VIDEODRIVER="dummy" F=525 python3 slam.py videos/test_freiburgxyz525.mp4
-
-
 ```
 
 You’ll need to replace DISPLAY_COOKIE with your your display cookie which you can get from xauth, it should look like the following

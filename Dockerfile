@@ -66,7 +66,7 @@ RUN /usr/bin/python3 setup.py install
 # Install twitchslam
 WORKDIR /app
 #RUN git clone https://github.com/geohot/twitchslam
-RUN git clone https://github.com/AdityaNG/twitchslam
+RUN git clone  https://github.com/AdityaNG/twitchslam
 WORKDIR /app/twitchslam
 RUN git checkout docker
 
