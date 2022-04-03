@@ -8,10 +8,14 @@ A toy implementation of monocular SLAM written while livestreaming.
 ```bash
 docker build -t twitchslam .
 docker run --runtime=nvidia --gpus all  --net=host -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all --env DISPLAY_COOKIE="sped-machine/unix:0  MIT-MAGIC-COOKIE-1  5ed98dd8a299505cac6bc6004209b381" -it twitchslam
+
+docker run --runtime=nvidia --gpus all  --net=host -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all --env DISPLAY_COOKIE="sped-machine/unix:0  MIT-MAGIC-COOKIE-1  5ed98dd8a299505cac6bc6004209b381" -it twitchslam /bin/bash
 ```
 
 ## Install nvidia-docker2
 ```bash
+xhost +local:docker
+
 sudo apt install nvidia-docker2
 
 sudo systemctl daemon-reload
