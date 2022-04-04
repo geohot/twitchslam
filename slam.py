@@ -12,6 +12,7 @@ import sys
 
 import time
 import cv2
+from depth_slam import FRAME_SKIP
 from display import Display2D, Display3D
 from frame import Frame, match_frames
 import numpy as np
@@ -217,7 +218,8 @@ if __name__ == "__main__":
   while cap.isOpened():
     ret, frame_old = cap.read()
 
-    FRAME_SKIP = int(os.getenv("FSKIP"))
+    #FRAME_SKIP = int(os.getenv("FSKIP")) +1
+    FRAME_SKIP = 1 if not os.getenv("FSKIP") else int(os.getenv("FSKIP"))
     i=0
     while ret and i<FRAME_SKIP:
       frame = frame_old

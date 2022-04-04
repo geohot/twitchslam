@@ -63,10 +63,13 @@ RUN /usr/bin/make install
 WORKDIR /app/g2opy/
 RUN /usr/bin/python3 setup.py install
 
+RUN /usr/bin/python3 -m pip install pandas
+
 # Install twitchslam
 WORKDIR /app
 #RUN git clone https://github.com/geohot/twitchslam
-RUN git clone  https://github.com/AdityaNG/twitchslam
+#RUN git clone   https://github.com/AdityaNG/twitchslam
+COPY . /app/twitchslam
 WORKDIR /app/twitchslam
 RUN git checkout docker
 

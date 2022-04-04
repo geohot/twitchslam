@@ -174,6 +174,8 @@ import glob
 import time
 import cv2
 
+FRAME_SKIP = 1 if not os.getenv("FSKIP") else int(os.getenv("FSKIP"))
+
 #manydepth_path = "dataset/manydepth/000008"
 dataset_dir = "/mnt/HDD/home/aditya/elab_visualiser/elab"
 
