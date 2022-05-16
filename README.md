@@ -5,47 +5,19 @@ A toy implementation of monocular SLAM written while livestreaming.
 <img width=600px src="https://raw.githubusercontent.com/geohot/twitchslam/master/example.png" />
 
 # Docker
+Pull the docker container
+```bash
+docker pull adityang5/twitchslam
+```
+
+Or you can build the container using the following
 ```bash
 docker build -t twitchslam .
-
-docker run --runtime=nvidia --gpus all  --net=host -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all --env DISPLAY_COOKIE="DISPLAY_COOKIE" -it twitchslam
 ```
 
-You’ll need to replace DISPLAY_COOKIE with your your display cookie which you can get from xauth, it should look like the following
+You can run the container customizing the provided `twitchslam_docker.sh`
 ```bash
-$ xauth list
-username/machine:0 MIT-MAGIC-COOKIE-1 [32 character string]
-```
-The final command should look something like one of the following
-```bash
-docker run --runtime=nvidia --gpus all  --net=host \
-    -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all \
-    --mount type=bind,source=/mnt/HDD/home/aditya/elab_visualiser/elab/1644664247513,target=/videos \
-    --env DISPLAY_COOKIE="sped-machine/unix:1  MIT-MAGIC-COOKIE-1  a1654666c7a832aa599d9cf267033379" \
-    --env VIDEO_PATH="1644664247513.mp4" \
-    -e SEEK=100 -e  FSKIP=5 -e F=1000 \
-    -it twitchslam
-
-docker run --runtime=nvidia --gpus all  --net=host \
-    -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all \
-    --mount type=bind,source="$(pwd)"/videos,target=/videos \
-    --env DISPLAY_COOKIE="sped-machine/unix:1  MIT-MAGIC-COOKIE-1  a1654666c7a832aa599d9cf267033379" \
-    --env VIDEO_PATH="test_freiburgrpy525.mp4" \
-    -e F=525 \
-    -it twitchslam
-
-docker run --runtime=nvidia --gpus all  --net=host \
-    -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all \
-    --mount type=bind,source="$(pwd)"/videos,target=/videos \
-    --env DISPLAY_COOKIE="sped-machine/unix:1  MIT-MAGIC-COOKIE-1  a1654666c7a832aa599d9cf267033379" \
-    --env VIDEO_PATH="test_freiburgxyz525.mp4" \
-    -e F=525 \
-    -it twitchslam
-
-docker run --runtime=nvidia --gpus all  --net=host -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all --mount type=bind,source="$(pwd)"/videos,target=/videos --env DISPLAY_COOKIE="sped-machine/unix:1  MIT-MAGIC-COOKIE-1  a1654666c7a832aa599d9cf267033379" --env VIDEO_PATH="test_freiburgrpy525.mp4"   -it twitchslam
-
-# To get shell access
-docker run --runtime=nvidia --gpus all  --net=host -e DISPLAY --rm -v /tmp/.X11-unix -e NVIDIA_DRIVER_CAPABILITIES=all --mount type=bind,source="$(pwd)"/videos,target=/videos --env DISPLAY_COOKIE="sped-machine/unix:1  MIT-MAGIC-COOKIE-1  a1654666c7a832aa599d9cf267033379" -it twitchslam /bin/bash
+./twitchslam_docker.sh
 ```
 
 ## Install nvidia-docker2
