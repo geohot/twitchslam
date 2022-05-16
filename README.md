@@ -4,6 +4,33 @@ A toy implementation of monocular SLAM written while livestreaming.
 
 <img width=600px src="https://raw.githubusercontent.com/geohot/twitchslam/master/example.png" />
 
+# Docker
+Pull the docker container
+```bash
+docker pull adityang5/twitchslam
+```
+
+Or you can build the container using the following
+```bash
+docker build -t twitchslam .
+```
+
+You can run the container customizing the provided `twitchslam_docker.sh`
+```bash
+./twitchslam_docker.sh
+```
+
+## Install nvidia-docker2
+
+```bash
+xhost +local:docker
+
+sudo apt install nvidia-docker2
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
 Stream
 -----
 
@@ -24,6 +51,8 @@ export F=500       # Focal length (in px)
 
 # good example
 F=525 ./slam.py videos/test_freiburgxyz525.mp4
+
+F=525 python3 slam.py videos/test_freiburgxyz525.mp4
 
 # ground truth
 F=525 ./slam.py videos/test_freiburgrpy525.mp4 videos/test_freiburgrpy525.npz

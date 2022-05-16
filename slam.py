@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
+
 import os
 import sys
-
-sys.path.append("lib/macosx")
-sys.path.append("lib/linux")
-
 import time
 import cv2
 from display import Display2D, Display3D
@@ -210,7 +207,16 @@ if __name__ == "__main__":
 
   i = 0
   while cap.isOpened():
-    ret, frame = cap.read()
+    ret, frame_old = cap.read()
+
+    #FRAME_SKIP = int(os.getenv("FSKIP")) +1
+    FRAME_SKIP = 1 if not os.getenv("FSKIP") else int(os.getenv("FSKIP"))
+    i=0
+    while ret and i<FRAME_SKIP:
+      frame = frame_old
+      ret, frame_old = cap.read()
+      i+=1
+
     frame = cv2.resize(frame, (W, H))
 
     print("\n*** frame %d/%d ***" % (i, CNT))
