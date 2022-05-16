@@ -1,18 +1,9 @@
 #!/usr/bin/env python3
 
-# SEEK=100 FSKIP=5 F=1000 python slam.py /mnt/HDD/home/aditya/elab_visualiser/elab/1644664247513/1644664247513.mp4
-
 import os
 import sys
-
-#sys.path.append("lib/macosx")
-#sys.path.append("lib/linux")
-
-#Path(os.getcwd()).parent.absolute()
-
 import time
 import cv2
-from depth_slam import FRAME_SKIP
 from display import Display2D, Display3D
 from frame import Frame, match_frames
 import numpy as np
